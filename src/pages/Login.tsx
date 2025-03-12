@@ -4,17 +4,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, would validate and authenticate here
-    navigate("/app");
+    
+    const storedEmail = localStorage.getItem("srm-user-email");
+    const storedPassword = localStorage.getItem("srm-user-password");
+    
+    if (email === storedEmail && password === storedPassword) {
+      // Set logged in status
+      localStorage.setItem("srm-user-logged-in", "true");
+      navigate("/app");
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: "Invalid email or password. Please try again.",
+      });
+    }
   };
 
   return (

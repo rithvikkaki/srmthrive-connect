@@ -1,19 +1,86 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings } from "lucide-react";
+import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
 
 const Profile = () => {
   const { id } = useParams();
   const [postText, setPostText] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("https://i.pravatar.cc/100?img=12");
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleSubmitPost = () => {
     // Would handle post submission in a real app
     setPostText("");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Check if file is an image
+      if (!file.type.startsWith("image/")) {
+        toast({
+          variant: "destructive",
+          title: "Invalid file type",
+          description: "Please upload an image file (JPG, PNG, etc.)",
+        });
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: "Please upload an image smaller than 5MB",
+        });
+        return;
+      }
+      
+      setUploadedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setDialogOpen(true);
+    }
+  };
+
+  const handleUpdateAvatar = () => {
+    if (previewUrl) {
+      setAvatarUrl(previewUrl);
+      toast({
+        title: "Profile photo updated",
+        description: "Your profile photo has been successfully updated",
+      });
+      setDialogOpen(false);
+      
+      // In a real app, you would upload the image to a server here
+      // and then update the user's profile with the new image URL
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const cancelUpload = () => {
+    setUploadedImage(null);
+    setPreviewUrl(null);
+    setDialogOpen(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -22,14 +89,24 @@ const Profile = () => {
         <div className="h-48 bg-gradient-to-r from-thrive-500/20 to-thrive-700/20"></div>
         <div className="p-6 relative">
           <div className="absolute -top-16 left-6 w-32 h-32 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 p-1">
-            <div className="w-full h-full rounded-full overflow-hidden">
-              <img 
-                src="https://i.pravatar.cc/100?img=12" 
-                alt="Rithvik Kaki"
-                className="w-full h-full object-cover"
-              />
+            <div className="w-full h-full rounded-full overflow-hidden relative group cursor-pointer" onClick={triggerFileInput}>
+              <Avatar className="w-full h-full">
+                <AvatarImage src={avatarUrl} alt="Rithvik Kaki" className="w-full h-full object-cover" />
+                <AvatarFallback>RK</AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Upload className="h-6 w-6 text-white" />
+              </div>
             </div>
           </div>
+          
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            className="hidden" 
+            accept="image/*" 
+            onChange={handleFileChange}
+          />
           
           <div className="flex justify-between items-start pt-16">
             <div className="text-white">
@@ -197,6 +274,40 @@ const Profile = () => {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Profile Photo</DialogTitle>
+            <DialogDescription>
+              Preview and save your new profile photo
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center">
+            {previewUrl && (
+              <div className="relative mb-4">
+                <img 
+                  src={previewUrl} 
+                  alt="Preview" 
+                  className="w-32 h-32 rounded-full object-cover border-2 border-muted"
+                />
+                <button 
+                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1"
+                  onClick={cancelUpload}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={cancelUpload}>Cancel</Button>
+              <Button onClick={handleUpdateAvatar}>Save New Photo</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

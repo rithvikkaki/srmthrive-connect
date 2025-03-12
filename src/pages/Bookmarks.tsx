@@ -3,6 +3,25 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bookmark, FileText, GraduationCap, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+type BookmarkType = "research" | "internship" | "job" | "event";
+
+interface BookmarkItem {
+  id: number;
+  title: string;
+  description: string;
+  type: BookmarkType;
+  date: string;
+  details?: string;
+  company?: string;
+  location?: string;
+  salary?: string;
+  deadline?: string;
+  requirements?: string[];
+  contact?: string;
+}
 
 const Bookmarks = () => {
   const [bookmarks] = useState<BookmarkItem[]>([
@@ -11,37 +30,69 @@ const Bookmarks = () => {
       title: "Research Opportunity: AI in Healthcare",
       description: "Join the research team working on innovative AI solutions for healthcare.",
       type: "research",
-      date: "2023-07-15"
+      date: "2023-07-15",
+      details: "This research project focuses on developing AI algorithms to analyze medical images for early disease detection. The team is led by Dr. Johnson from the Computer Science department.",
+      requirements: ["Knowledge of Python", "Experience with TensorFlow or PyTorch", "Interest in healthcare applications"],
+      deadline: "2023-08-15",
+      contact: "dr.johnson@srm.edu"
     },
     {
       id: 2,
       title: "Summer Internship at Tech Solutions Inc.",
       description: "Apply for a 3-month internship program focusing on web development and UI/UX design.",
       type: "internship",
-      date: "2023-07-20"
+      date: "2023-07-20",
+      company: "Tech Solutions Inc.",
+      location: "Chennai, Tamil Nadu",
+      salary: "₹15,000/month",
+      details: "This internship provides hands-on experience in web development using React, Node.js, and other modern technologies. Interns will work on real client projects under mentorship.",
+      requirements: ["Basic understanding of HTML, CSS, JavaScript", "Knowledge of React is a plus", "Good communication skills"],
+      deadline: "2023-08-30",
+      contact: "careers@techsolutions.com"
     },
     {
       id: 3,
       title: "Workshop on Blockchain Technology",
       description: "Attend this workshop to learn about blockchain fundamentals and applications.",
       type: "event",
-      date: "2023-08-05"
+      date: "2023-08-05",
+      details: "This one-day workshop will cover blockchain basics, smart contracts, and practical applications. Includes hands-on sessions and networking opportunities.",
+      location: "Main Auditorium, SRM University",
+      deadline: "2023-08-03",
+      contact: "events@srm.edu"
     },
     {
       id: 4,
       title: "Job Opening: Software Developer",
       description: "Full-time position for recent graduates with knowledge of React and Node.js.",
       type: "job",
-      date: "2023-08-10"
+      date: "2023-08-10",
+      company: "Innovate Tech",
+      location: "Bangalore, Karnataka",
+      salary: "₹6-10 LPA",
+      details: "This is an entry-level position for recent graduates interested in full-stack development. You'll be working on cutting-edge web applications for various clients.",
+      requirements: ["Bachelor's degree in CS or related field", "Knowledge of React, Node.js", "Good problem-solving skills", "0-2 years experience"],
+      contact: "hr@innovatetech.com"
     },
     {
       id: 5,
       title: "Research Paper: Machine Learning Algorithms",
       description: "Review this important research paper on advanced ML algorithms for your project.",
       type: "research",
-      date: "2023-08-12"
+      date: "2023-08-12",
+      details: "This paper presents novel machine learning approaches for image classification with limited training data. Important reference for students working on ML projects.",
+      requirements: ["Basic understanding of machine learning concepts"],
+      contact: "library@srm.edu"
     }
   ]);
+
+  const [selectedBookmark, setSelectedBookmark] = useState<BookmarkItem | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleViewDetails = (bookmark: BookmarkItem) => {
+    setSelectedBookmark(bookmark);
+    setDialogOpen(true);
+  };
 
   return (
     <div className="container mx-auto">
@@ -61,47 +112,142 @@ const Bookmarks = () => {
         
         <TabsContent value="all" className="space-y-4">
           {bookmarks.map((bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard 
+              key={bookmark.id} 
+              bookmark={bookmark} 
+              onViewDetails={handleViewDetails} 
+            />
           ))}
         </TabsContent>
         
         <TabsContent value="research" className="space-y-4">
           {bookmarks.filter(b => b.type === "research").map((bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard 
+              key={bookmark.id} 
+              bookmark={bookmark} 
+              onViewDetails={handleViewDetails} 
+            />
           ))}
         </TabsContent>
         
         <TabsContent value="internship" className="space-y-4">
           {bookmarks.filter(b => b.type === "internship").map((bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard 
+              key={bookmark.id} 
+              bookmark={bookmark} 
+              onViewDetails={handleViewDetails} 
+            />
           ))}
         </TabsContent>
         
         <TabsContent value="job" className="space-y-4">
           {bookmarks.filter(b => b.type === "job").map((bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard 
+              key={bookmark.id} 
+              bookmark={bookmark} 
+              onViewDetails={handleViewDetails} 
+            />
           ))}
         </TabsContent>
         
         <TabsContent value="event" className="space-y-4">
           {bookmarks.filter(b => b.type === "event").map((bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard 
+              key={bookmark.id} 
+              bookmark={bookmark} 
+              onViewDetails={handleViewDetails} 
+            />
           ))}
         </TabsContent>
       </Tabs>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          {selectedBookmark && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl">{selectedBookmark.title}</DialogTitle>
+                <DialogDescription className="flex items-center gap-1 pt-2">
+                  <span className="text-xs bg-muted px-2 py-1 rounded-full uppercase">
+                    {selectedBookmark.type}
+                  </span>
+                  <span className="text-muted-foreground text-sm ml-2">
+                    Saved on {new Date(selectedBookmark.date).toLocaleDateString()}
+                  </span>
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                {selectedBookmark.company && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">COMPANY</h3>
+                    <p>{selectedBookmark.company}</p>
+                  </div>
+                )}
+                
+                {selectedBookmark.location && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">LOCATION</h3>
+                    <p>{selectedBookmark.location}</p>
+                  </div>
+                )}
+                
+                {selectedBookmark.salary && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">COMPENSATION</h3>
+                    <p>{selectedBookmark.salary}</p>
+                  </div>
+                )}
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">DESCRIPTION</h3>
+                  <p>{selectedBookmark.details || selectedBookmark.description}</p>
+                </div>
+                
+                {selectedBookmark.requirements && selectedBookmark.requirements.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">REQUIREMENTS</h3>
+                    <ul className="list-disc pl-4 space-y-1">
+                      {selectedBookmark.requirements.map((req, index) => (
+                        <li key={index}>{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {selectedBookmark.deadline && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">DEADLINE</h3>
+                    <p>{new Date(selectedBookmark.deadline).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {selectedBookmark.contact && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">CONTACT</h3>
+                    <p>{selectedBookmark.contact}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>Close</Button>
+                <Button>Apply Now</Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-interface BookmarkItem {
-  id: number;
-  title: string;
-  description: string;
-  type: "research" | "internship" | "job" | "event";
-  date: string;
+interface BookmarkCardProps {
+  bookmark: BookmarkItem;
+  onViewDetails: (bookmark: BookmarkItem) => void;
 }
 
-const BookmarkCard = ({ bookmark }: { bookmark: BookmarkItem }) => {
+const BookmarkCard = ({ bookmark, onViewDetails }: BookmarkCardProps) => {
   const getTypeIcon = () => {
     switch (bookmark.type) {
       case "research":
@@ -133,7 +279,13 @@ const BookmarkCard = ({ bookmark }: { bookmark: BookmarkItem }) => {
         <p className="text-muted-foreground mb-4">{bookmark.description}</p>
         <div className="flex gap-2">
           <span className="text-xs bg-muted px-2 py-1 rounded-full uppercase">{bookmark.type}</span>
-          <a href="#" className="text-sm text-thrive-500 hover:underline ml-auto">View Details</a>
+          <Button 
+            variant="link" 
+            className="text-sm text-thrive-500 hover:underline ml-auto p-0 h-auto" 
+            onClick={() => onViewDetails(bookmark)}
+          >
+            View Details
+          </Button>
         </div>
       </CardContent>
     </Card>

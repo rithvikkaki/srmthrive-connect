@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Calendar } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Register = () => {
   const [institutionName, setInstitutionName] = useState("SRM University");
@@ -13,11 +14,21 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, would validate and register here
-    navigate("/app");
+    // Store user credentials in localStorage for basic authentication
+    localStorage.setItem("srm-user-email", email);
+    localStorage.setItem("srm-user-password", password);
+    
+    toast({
+      title: "Account created successfully",
+      description: "Please login with your credentials",
+    });
+    
+    // Redirect to login page
+    navigate("/login");
   };
 
   return (

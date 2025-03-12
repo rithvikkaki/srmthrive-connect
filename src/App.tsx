@@ -14,6 +14,8 @@ import Blogs from "./pages/Blogs";
 import Notices from "./pages/Notices";
 import Bookmarks from "./pages/Bookmarks";
 import Fellows from "./pages/Fellows";
+import Events from "./pages/Events";
+import Groups from "./pages/Groups";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 
@@ -37,6 +39,8 @@ const App = () => (
             <Route path="notices" element={<Notices />} />
             <Route path="bookmarks" element={<Bookmarks />} />
             <Route path="fellows" element={<Fellows />} />
+            <Route path="events" element={<Events />} />
+            <Route path="groups" element={<Groups />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
