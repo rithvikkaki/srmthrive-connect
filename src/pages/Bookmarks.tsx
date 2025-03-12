@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bookmark, FileText, GraduationCap, Users } from "lucide-react";
 
 const Bookmarks = () => {
-  const [bookmarks] = useState([
+  const [bookmarks] = useState<BookmarkItem[]>([
     {
       id: 1,
       title: "Research Opportunity: AI in Healthcare",
