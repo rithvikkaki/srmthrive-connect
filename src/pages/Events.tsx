@@ -1,8 +1,10 @@
 
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, BookOpen, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const Events = () => {
+  // Current events with day orders
   const currentEvents = [
     {
       id: 1,
@@ -27,9 +29,26 @@ const Events = () => {
       date: "2024-04-20",
       type: "deadline",
       dayOrder: "Day 1"
+    },
+    {
+      id: 4,
+      title: "Technical Symposium",
+      description: "Department-wise technical competitions and workshops",
+      date: "2024-04-25",
+      type: "academic",
+      dayOrder: "Day 4"
+    },
+    {
+      id: 5,
+      title: "Industry Connect Session",
+      description: "Interaction with industry experts",
+      date: "2024-04-28",
+      type: "career",
+      dayOrder: "Day 2"
     }
   ];
 
+  // Holidays from the calendar image
   const holidays = [
     {
       id: 1,
@@ -39,35 +58,87 @@ const Events = () => {
     },
     {
       id: 2,
-      title: "Labour Day",
-      description: "Public holiday",
+      title: "May Day - Holiday",
+      description: "Labor Day public holiday",
       date: "2024-05-01"
+    },
+    {
+      id: 3,
+      title: "Good Friday",
+      description: "Public holiday",
+      date: "2024-04-19"
+    },
+    {
+      id: 4,
+      title: "Bakrid (Idul Azha)",
+      description: "Public holiday",
+      date: "2024-06-07"
+    },
+    {
+      id: 5,
+      title: "Mahaveer Jayanthi",
+      description: "Religious holiday",
+      date: "2024-04-11"
     }
   ];
 
+  // Assignments with subject codes from image
   const assignments = [
     {
       id: 1,
-      title: "Database Management System Project",
-      description: "Create a fully functional database with front-end connectivity",
+      title: "Cloud Computing Project",
+      description: "Implementation of cloud services with front-end connectivity",
       dueDate: "2024-04-12",
-      subject: "DBMS"
+      subject: "21CSE362T"
     },
     {
       id: 2,
-      title: "Machine Learning Case Study",
-      description: "Analysis and implementation of ML algorithms on provided dataset",
+      title: "Software Engineering Case Study",
+      description: "Analysis and documentation of a real-world software project",
       dueDate: "2024-04-18",
-      subject: "ML"
+      subject: "21CSC303J"
+    },
+    {
+      id: 3,
+      title: "Compiler Design Implementation",
+      description: "Create a simple compiler for a given grammar",
+      dueDate: "2024-04-20",
+      subject: "21CSC304J"
+    },
+    {
+      id: 4,
+      title: "AR/VR Demo Application",
+      description: "Develop a demonstration app using AR/VR technologies",
+      dueDate: "2024-04-15",
+      subject: "21CSE353T"
+    },
+    {
+      id: 5,
+      title: "Data Science Analysis",
+      description: "Statistical analysis of provided dataset",
+      dueDate: "2024-04-22",
+      subject: "21CSS303T"
     }
   ];
 
+  // Calculate days remaining for assignments
+  const calculateDaysRemaining = (dueDate: string) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
   return (
     <div className="container mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Academic Calendar & Events</h1>
+      <div className="flex items-center gap-2 mb-6">
+        <Calendar className="h-6 w-6 text-thrive-500" />
+        <h1 className="text-3xl font-bold">Academic Calendar & Events</h1>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="md:col-span-2">
           <CardHeader className="bg-thrive-50/20">
             <div className="flex items-center gap-3">
               <CalendarIcon className="h-6 w-6 text-thrive-500" />
@@ -83,18 +154,23 @@ const Events = () => {
                 <div key={event.id} className="border-b pb-3 last:border-0">
                   <div className="flex justify-between">
                     <h3 className="font-medium">{event.title}</h3>
-                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                    <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
                       {event.dayOrder}
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{event.description}</p>
                   <div className="flex justify-between mt-2">
                     <span className="text-xs text-muted-foreground">
-                      {new Date(event.date).toLocaleDateString()}
+                      {new Date(event.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
                     </span>
-                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">
+                    <Badge variant="secondary" className="text-xs">
                       {event.type}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -113,15 +189,20 @@ const Events = () => {
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto">
               {holidays.map(holiday => (
                 <div key={holiday.id} className="border-b pb-3 last:border-0">
                   <h3 className="font-medium">{holiday.title}</h3>
                   <p className="text-sm text-muted-foreground">{holiday.description}</p>
                   <div className="mt-2">
-                    <span className="text-xs text-red-600 font-medium">
-                      {new Date(holiday.date).toLocaleDateString()}
-                    </span>
+                    <Badge variant="destructive" className="text-xs">
+                      {new Date(holiday.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -133,7 +214,7 @@ const Events = () => {
       <Card className="mb-8">
         <CardHeader className="bg-amber-50">
           <div className="flex items-center gap-3">
-            <CalendarIcon className="h-6 w-6 text-amber-500" />
+            <BookOpen className="h-6 w-6 text-amber-500" />
             <div>
               <CardTitle>Assignment Due Dates</CardTitle>
               <CardDescription>Upcoming submissions and deadlines</CardDescription>
@@ -142,22 +223,37 @@ const Events = () => {
         </CardHeader>
         <CardContent className="pt-6">
           <div className="space-y-4">
-            {assignments.map(assignment => (
-              <div key={assignment.id} className="border-b pb-3 last:border-0">
-                <div className="flex justify-between">
-                  <h3 className="font-medium">{assignment.title}</h3>
-                  <span className="text-sm bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-                    {assignment.subject}
-                  </span>
+            {assignments.map(assignment => {
+              const daysRemaining = calculateDaysRemaining(assignment.dueDate);
+              
+              return (
+                <div key={assignment.id} className="border-b pb-3 last:border-0">
+                  <div className="flex justify-between">
+                    <h3 className="font-medium">{assignment.title}</h3>
+                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200">
+                      {assignment.subject}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{assignment.description}</p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-red-600">
+                      Due: {new Date(assignment.dueDate).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                    <Badge variant={daysRemaining <= 3 ? "destructive" : daysRemaining <= 7 ? "outline" : "secondary"}>
+                      {daysRemaining > 0 
+                        ? `${daysRemaining} day${daysRemaining === 1 ? '' : 's'} remaining`
+                        : daysRemaining === 0
+                          ? "Due today!"
+                          : "Overdue"}
+                    </Badge>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{assignment.description}</p>
-                <div className="mt-2">
-                  <span className="text-xs font-semibold text-red-600">
-                    Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

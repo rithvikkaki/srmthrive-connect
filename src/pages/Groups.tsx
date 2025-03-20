@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import { UsersRound, SearchIcon, BookOpen, Code, Rocket, Camera, Music, Beaker } from "lucide-react";
+import { UsersRound, SearchIcon, BookOpen, Code, Rocket, Camera, Music, Beaker, Globe, Heart, Pen, Dumbbell, PieChart, Utensils } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const Groups = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,6 +57,54 @@ const Groups = () => {
       members: 73,
       category: "academic",
       icon: <Beaker className="h-10 w-10 text-indigo-500" />
+    },
+    {
+      id: 7,
+      name: "Global Exchange Network",
+      description: "Connect with international students and cultural exchange",
+      members: 89,
+      category: "cultural",
+      icon: <Globe className="h-10 w-10 text-teal-500" />
+    },
+    {
+      id: 8,
+      name: "Social Outreach Team",
+      description: "Volunteer for community service and social causes",
+      members: 112,
+      category: "service",
+      icon: <Heart className="h-10 w-10 text-pink-500" />
+    },
+    {
+      id: 9,
+      name: "Creative Writing Club",
+      description: "Workshops and sessions for aspiring writers",
+      members: 64,
+      category: "creative",
+      icon: <Pen className="h-10 w-10 text-yellow-500" />
+    },
+    {
+      id: 10,
+      name: "Sports & Fitness Community",
+      description: "Join sports teams and fitness activities",
+      members: 145,
+      category: "sports",
+      icon: <Dumbbell className="h-10 w-10 text-orange-500" />
+    },
+    {
+      id: 11,
+      name: "Data Science Club",
+      description: "Explore data analysis, machine learning and AI",
+      members: 93,
+      category: "tech",
+      icon: <PieChart className="h-10 w-10 text-blue-600" />
+    },
+    {
+      id: 12,
+      name: "Culinary Arts Society",
+      description: "Cook-offs, recipe sharing and food exploration",
+      members: 76,
+      category: "lifestyle",
+      icon: <Utensils className="h-10 w-10 text-emerald-500" />
     }
   ];
 
@@ -72,19 +121,35 @@ const Groups = () => {
         <h1 className="text-3xl font-bold">Student Groups</h1>
       </div>
       
-      <div className="mb-6 relative">
-        <Input
-          className="pl-10"
-          placeholder="Search groups by name, description or category..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <div className="mb-6">
+        <div className="relative">
+          <Input
+            className="pl-10"
+            placeholder="Search groups by name, description or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mt-3">
+          <p className="text-sm text-muted-foreground mr-2 pt-1">Popular categories:</p>
+          {["tech", "academic", "creative", "business", "cultural"].map(category => (
+            <Badge 
+              key={category}
+              variant="outline"
+              className="cursor-pointer hover:bg-accent"
+              onClick={() => setSearchTerm(category)}
+            >
+              {category}
+            </Badge>
+          ))}
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredGroups.map(group => (
-          <Card key={group.id}>
+          <Card key={group.id} className="transition-all hover:shadow-md">
             <CardHeader className="flex flex-row items-center gap-4">
               <div className="bg-background p-2 rounded-xl border w-14 h-14 flex items-center justify-center">
                 {group.icon}
@@ -97,7 +162,7 @@ const Groups = () => {
             <CardContent>
               <p className="text-muted-foreground">{group.description}</p>
               <div className="flex justify-between items-center mt-4">
-                <span className="text-xs bg-muted px-2 py-1 rounded-full uppercase">{group.category}</span>
+                <Badge variant="outline" className="uppercase">{group.category}</Badge>
                 <Button variant="outline" size="sm">Join Group</Button>
               </div>
             </CardContent>
@@ -108,6 +173,13 @@ const Groups = () => {
       {filteredGroups.length === 0 && (
         <div className="text-center py-10">
           <p className="text-muted-foreground">No groups found matching your search.</p>
+          <Button 
+            variant="link" 
+            className="mt-2"
+            onClick={() => setSearchTerm("")}
+          >
+            Clear search
+          </Button>
         </div>
       )}
     </div>
