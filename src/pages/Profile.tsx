@@ -10,6 +10,9 @@ import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
 import { Textarea } from "@/components/ui/textarea";
 
+// Use a color for edit button from the provided palette.
+const EDIT_BUTTON_COLOR = "#9b87f5";
+
 const Profile = () => {
   const { id } = useParams();
   const [postText, setPostText] = useState("");
@@ -40,6 +43,22 @@ const Profile = () => {
     window.location.href = "/login";
   };
 
+  // Fix 1: Add posts array & [SHOW POSTS] when created!
+  const [posts, setPosts] = useState([
+    {
+      id: "4",
+      author: {
+        id: "4",
+        name: "Rithvik Kaki",
+        avatar: "https://i.pravatar.cc/100?img=12"
+      },
+      timeAgo: "7 months ago",
+      content: "Minor project presentation",
+      likes: 0,
+      comments: 0
+    }
+  ]);
+
   const handleSubmitPost = () => {
     if (!postText.trim()) {
       toast({
@@ -50,20 +69,32 @@ const Profile = () => {
       return;
     }
 
-    // Create a new post
+    const newPost = {
+      id: `post-${Date.now()}`,
+      author: {
+        id: "4",
+        name: profileData.name,
+        avatar: avatarUrl
+      },
+      timeAgo: "just now",
+      content: postText,
+      likes: 0,
+      comments: 0
+    };
+
+    setPosts([newPost, ...posts]);
+    setPostText("");
     toast({
       title: "Post created",
       description: "Your post has been successfully published",
     });
-    setPostText("");
-    // In a real app, you would save this to a database
   };
 
+  // Fix avatar update logic: setAvatarUrl from preview, reset previewUrl+file & input value
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      // Check if file is an image
       if (!file.type.startsWith("image/")) {
         toast({
           variant: "destructive",
@@ -72,8 +103,6 @@ const Profile = () => {
         });
         return;
       }
-      
-      // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           variant: "destructive",
@@ -82,7 +111,6 @@ const Profile = () => {
         });
         return;
       }
-      
       setUploadedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       setDialogOpen(true);
@@ -90,16 +118,16 @@ const Profile = () => {
   };
 
   const handleUpdateAvatar = () => {
-    if (previewUrl) {
+    if (previewUrl && uploadedImage) {
       setAvatarUrl(previewUrl);
       toast({
         title: "Profile photo updated",
         description: "Your profile photo has been successfully updated",
       });
       setDialogOpen(false);
-      
-      // In a real app, you would upload the image to a server here
-      // and then update the user's profile with the new image URL
+      setUploadedImage(null);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -166,16 +194,18 @@ const Profile = () => {
             <div className="text-white cursor-pointer" onClick={handleEditProfile}>
               <h1 className="text-3xl font-bold">{profileData.name}</h1>
               <div className="flex gap-4 text-white/80 mt-1">
-                <span>3 Posts</span>
+                <span>{posts.length} Posts</span>
                 <span>3 Blogs</span>
                 <span>6 Friends</span>
               </div>
               <p className="text-white/60 mt-1">{profileData.bio}</p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Change: Edit button color */}
               <Button 
                 variant="outline" 
-                className="text-thrive-500 border-thrive-500 hover:bg-thrive-50 hover:text-thrive-700 transition" // Changed color, not plain white
+                className="text-white border-0"
+                style={{ background: EDIT_BUTTON_COLOR }}
                 onClick={handleEditProfile}
               >
                 <Pencil className="h-4 w-4 mr-1" />
@@ -223,7 +253,8 @@ const Profile = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="text-thrive-500 border-thrive-500 hover:bg-thrive-50 hover:text-thrive-700 transition"
+                  className="text-white border-0"
+                  style={{ background: EDIT_BUTTON_COLOR }}
                   onClick={handleEditProfile}
                 >
                   <Pencil className="h-4 w-4 mr-1" />
@@ -348,6 +379,7 @@ const Profile = () => {
           </div>
         </div>
         
+        {/* POSTS section now shows posts correctly */}
         <div className="md:col-span-2 space-y-6">
           <div className="bg-card rounded-md shadow-sm border border-border p-4">
             <div className="flex items-center gap-3 mb-4">
@@ -416,6 +448,7 @@ const Profile = () => {
             </div>
           </div>
           
+          {/* Show posts */}
           <Tabs defaultValue="posts">
             <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0">
               <TabsTrigger 
@@ -445,18 +478,22 @@ const Profile = () => {
             </TabsList>
             
             <TabsContent value="posts" className="mt-6 space-y-6">
-              <Post 
-                id="4"
-                author={{
-                  id: "4",
-                  name: "Rithvik Kaki",
-                  avatar: "https://i.pravatar.cc/100?img=12"
-                }}
-                timeAgo="7 months ago"
-                content="Minor project presentation"
-                likes={0}
-                comments={0}
-              />
+              {posts.map((post) => (
+                <Post 
+                  key={post.id}
+                  id={post.id}
+                  author={post.author}
+                  timeAgo={post.timeAgo}
+                  content={post.content}
+                  likes={post.likes}
+                  comments={post.comments}
+                />
+              ))}
+              {posts.length === 0 && (
+                <div className="py-8 text-center text-muted-foreground">
+                  No posts yet.
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="blogs">
