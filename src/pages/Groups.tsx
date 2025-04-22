@@ -1,15 +1,25 @@
-
 import { useState } from "react";
 import { UsersRound, SearchIcon, BookOpen, Code, Rocket, Camera, Music, Beaker, Globe, Heart, Pen, Dumbbell, PieChart, Utensils } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
+
+interface Group {
+  id: number;
+  name: string;
+  description: string;
+  members: number;
+  category: string;
+  icon: JSX.Element;
+  joined?: boolean;
+}
 
 const Groups = () => {
   const [searchTerm, setSearchTerm] = useState("");
   
-  const groups = [
+  const [groups, setGroups] = useState<Group[]>([
     {
       id: 1,
       name: "Web Development Club",
@@ -106,7 +116,32 @@ const Groups = () => {
       category: "lifestyle",
       icon: <Utensils className="h-10 w-10 text-emerald-500" />
     }
-  ];
+  ]);
+
+  // Handle joining a group
+  const handleJoinGroup = (groupId: number) => {
+    setGroups(prevGroups => 
+      prevGroups.map(group => 
+        group.id === groupId 
+          ? { 
+              ...group, 
+              joined: !group.joined,
+              members: group.joined ? group.members - 1 : group.members + 1
+            }
+          : group
+      )
+    );
+    
+    const group = groups.find(g => g.id === groupId);
+    if (group) {
+      const action = group.joined ? "left" : "joined";
+      toast({
+        title: `Successfully ${action} group`,
+        description: `You have ${action} "${group.name}"`,
+        duration: 3000,
+      });
+    }
+  };
 
   const filteredGroups = groups.filter(group => 
     group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -163,7 +198,13 @@ const Groups = () => {
               <p className="text-muted-foreground">{group.description}</p>
               <div className="flex justify-between items-center mt-4">
                 <Badge variant="outline" className="uppercase">{group.category}</Badge>
-                <Button variant="outline" size="sm">Join Group</Button>
+                <Button 
+                  variant={group.joined ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => handleJoinGroup(group.id)}
+                >
+                  {group.joined ? "Leave Group" : "Join Group"}
+                </Button>
               </div>
             </CardContent>
           </Card>

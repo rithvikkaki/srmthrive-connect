@@ -1,10 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bookmark, FileText, GraduationCap, Users } from "lucide-react";
+import { Bookmark, FileText, GraduationCap, Users, Trash, BookmarkX } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 type BookmarkType = "research" | "internship" | "job" | "event";
 
@@ -21,10 +21,11 @@ interface BookmarkItem {
   deadline?: string;
   requirements?: string[];
   contact?: string;
+  isBookmarked?: boolean;
 }
 
 const Bookmarks = () => {
-  const [bookmarks] = useState<BookmarkItem[]>([
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([
     {
       id: 1,
       title: "Research Opportunity: AI in Healthcare",
@@ -89,10 +90,57 @@ const Bookmarks = () => {
   const [selectedBookmark, setSelectedBookmark] = useState<BookmarkItem | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  // Function to toggle bookmark status
+  const toggleBookmark = (bookmarkId: number) => {
+    setBookmarks(prevBookmarks => 
+      prevBookmarks.map(bookmark => 
+        bookmark.id === bookmarkId 
+          ? { ...bookmark, isBookmarked: !(bookmark.isBookmarked ?? true) }
+          : bookmark
+      )
+    );
+    
+    // Show toast notification
+    const bookmark = bookmarks.find(b => b.id === bookmarkId);
+    if (bookmark) {
+      const action = bookmark.isBookmarked ? "removed from" : "added to";
+      toast({
+        title: `Bookmark ${action} your collection`,
+        description: `"${bookmark.title}" has been ${action} your bookmarks.`,
+        duration: 3000,
+      });
+    }
+  };
+
+  // Function to remove bookmark from list
+  const removeBookmark = (bookmarkId: number) => {
+    const bookmarkToRemove = bookmarks.find(b => b.id === bookmarkId);
+    
+    setBookmarks(prevBookmarks => 
+      prevBookmarks.filter(bookmark => bookmark.id !== bookmarkId)
+    );
+    
+    // Show toast notification
+    if (bookmarkToRemove) {
+      toast({
+        title: "Bookmark removed",
+        description: `"${bookmarkToRemove.title}" has been removed from your bookmarks.`,
+        duration: 3000,
+      });
+    }
+  };
+
   const handleViewDetails = (bookmark: BookmarkItem) => {
     setSelectedBookmark(bookmark);
     setDialogOpen(true);
   };
+
+  // Set all bookmarks as initially bookmarked
+  useEffect(() => {
+    setBookmarks(prev => 
+      prev.map(bookmark => ({ ...bookmark, isBookmarked: true }))
+    );
+  }, []);
 
   return (
     <div className="container mx-auto">
@@ -116,8 +164,15 @@ const Bookmarks = () => {
               key={bookmark.id} 
               bookmark={bookmark} 
               onViewDetails={handleViewDetails} 
+              onToggleBookmark={toggleBookmark}
+              onRemoveBookmark={removeBookmark}
             />
           ))}
+          {bookmarks.length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">You don't have any bookmarks yet.</p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="research" className="space-y-4">
@@ -126,8 +181,15 @@ const Bookmarks = () => {
               key={bookmark.id} 
               bookmark={bookmark} 
               onViewDetails={handleViewDetails} 
+              onToggleBookmark={toggleBookmark}
+              onRemoveBookmark={removeBookmark}
             />
           ))}
+          {bookmarks.filter(b => b.type === "research").length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No research bookmarks found.</p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="internship" className="space-y-4">
@@ -136,8 +198,15 @@ const Bookmarks = () => {
               key={bookmark.id} 
               bookmark={bookmark} 
               onViewDetails={handleViewDetails} 
+              onToggleBookmark={toggleBookmark}
+              onRemoveBookmark={removeBookmark}
             />
           ))}
+          {bookmarks.filter(b => b.type === "internship").length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No internship bookmarks found.</p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="job" className="space-y-4">
@@ -146,8 +215,15 @@ const Bookmarks = () => {
               key={bookmark.id} 
               bookmark={bookmark} 
               onViewDetails={handleViewDetails} 
+              onToggleBookmark={toggleBookmark}
+              onRemoveBookmark={removeBookmark}
             />
           ))}
+          {bookmarks.filter(b => b.type === "job").length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No job bookmarks found.</p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="event" className="space-y-4">
@@ -156,8 +232,15 @@ const Bookmarks = () => {
               key={bookmark.id} 
               bookmark={bookmark} 
               onViewDetails={handleViewDetails} 
+              onToggleBookmark={toggleBookmark}
+              onRemoveBookmark={removeBookmark}
             />
           ))}
+          {bookmarks.filter(b => b.type === "event").length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No event bookmarks found.</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
@@ -231,7 +314,23 @@ const Bookmarks = () => {
               </div>
               
               <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Close</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setDialogOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => {
+                    removeBookmark(selectedBookmark.id);
+                    setDialogOpen(false);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <BookmarkX className="h-4 w-4" />
+                  Remove Bookmark
+                </Button>
                 <Button>Apply Now</Button>
               </div>
             </>
@@ -245,9 +344,11 @@ const Bookmarks = () => {
 interface BookmarkCardProps {
   bookmark: BookmarkItem;
   onViewDetails: (bookmark: BookmarkItem) => void;
+  onToggleBookmark: (bookmarkId: number) => void;
+  onRemoveBookmark: (bookmarkId: number) => void;
 }
 
-const BookmarkCard = ({ bookmark, onViewDetails }: BookmarkCardProps) => {
+const BookmarkCard = ({ bookmark, onViewDetails, onToggleBookmark, onRemoveBookmark }: BookmarkCardProps) => {
   const getTypeIcon = () => {
     switch (bookmark.type) {
       case "research":
@@ -273,7 +374,21 @@ const BookmarkCard = ({ bookmark, onViewDetails }: BookmarkCardProps) => {
             <CardDescription>Saved on {new Date(bookmark.date).toLocaleDateString()}</CardDescription>
           </div>
         </div>
-        <Bookmark className="h-5 w-5 text-thrive-500 cursor-pointer" fill="currentColor" />
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => onRemoveBookmark(bookmark.id)}
+            className="h-8 w-8 text-muted-foreground hover:text-red-500"
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+          <Bookmark 
+            className={`h-5 w-5 cursor-pointer ${bookmark.isBookmarked ? 'text-thrive-500' : 'text-muted-foreground'}`}
+            fill={bookmark.isBookmarked ? "currentColor" : "none"}
+            onClick={() => onToggleBookmark(bookmark.id)}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">{bookmark.description}</p>
