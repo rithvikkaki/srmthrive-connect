@@ -1,7 +1,6 @@
-
 import { useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X, Check } from "lucide-react";
+import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X, Check, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,17 +23,22 @@ const Profile = () => {
     bio: "Student | MERN Stack",
     department: "CS",
     university: "SRM University",
-    year: "4"
+    year: "4",
+    joined: "2021-09-05",
+    course: "BTech Computer Science",
+    role: "Student", // Student/Teacher/Researcher
+    hobbies: "Guitar, Football",
+    interests: "AI, Web Dev",
+    achievements: "Won Coding Hackathon 2024"
   });
-  const [editProfileData, setEditProfileData] = useState({
-    name: "Rithvik Kaki",
-    bio: "Student | MERN Stack",
-    department: "CS",
-    university: "SRM University",
-    year: "4"
-  });
+  const [editProfileData, setEditProfileData] = useState({...profileData});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleLogout = () => {
+    // Ideally, disconnect from Supabase/auth etc.
+    window.location.href = "/login";
+  };
 
   const handleSubmitPost = () => {
     if (!postText.trim()) {
@@ -159,7 +163,7 @@ const Profile = () => {
           />
           
           <div className="flex justify-between items-start pt-16">
-            <div className="text-white">
+            <div className="text-white cursor-pointer" onClick={handleEditProfile}>
               <h1 className="text-3xl font-bold">{profileData.name}</h1>
               <div className="flex gap-4 text-white/80 mt-1">
                 <span>3 Posts</span>
@@ -168,13 +172,24 @@ const Profile = () => {
               </div>
               <p className="text-white/60 mt-1">{profileData.bio}</p>
             </div>
-            <Button 
-              variant="outline" 
-              className="text-white border-white/20 hover:bg-white/10"
-              onClick={handleEditProfile}
-            >
-              EDIT
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                className="text-thrive-500 border-thrive-500 hover:bg-thrive-50 hover:text-thrive-700 transition" // Changed color, not plain white
+                onClick={handleEditProfile}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                EDIT
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={handleLogout}
+                className="ml-2"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                LOGOUT
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -195,14 +210,23 @@ const Profile = () => {
                       <p className="font-medium">Year {profileData.year}</p>
                     </div>
                   </div>
+                  <div className="mt-4 space-y-2">
+                    <div><span className="font-medium">Joined:</span> {profileData.joined}</div>
+                    <div><span className="font-medium">Course:</span> {profileData.course}</div>
+                    <div><span className="font-medium">Role:</span> {profileData.role}</div>
+                    <div><span className="font-medium">Hobbies:</span> {profileData.hobbies}</div>
+                    <div><span className="font-medium">Interests:</span> {profileData.interests}</div>
+                    <div><span className="font-medium">Achievements:</span> {profileData.achievements}</div>
+                  </div>
                 </div>
                 
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="text-thrive-500"
+                  className="text-thrive-500 border-thrive-500 hover:bg-thrive-50 hover:text-thrive-700 transition"
                   onClick={handleEditProfile}
                 >
+                  <Pencil className="h-4 w-4 mr-1" />
                   EDIT
                 </Button>
               </div>
@@ -246,6 +270,48 @@ const Profile = () => {
                         onChange={(e) => setEditProfileData({...editProfileData, year: e.target.value})}
                       />
                     </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Joined</label>
+                      <Input 
+                        value={editProfileData.joined} 
+                        onChange={(e) => setEditProfileData({...editProfileData, joined: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Course</label>
+                      <Input 
+                        value={editProfileData.course} 
+                        onChange={(e) => setEditProfileData({...editProfileData, course: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Role</label>
+                      <Input 
+                        value={editProfileData.role} 
+                        onChange={(e) => setEditProfileData({...editProfileData, role: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Hobbies</label>
+                      <Input 
+                        value={editProfileData.hobbies} 
+                        onChange={(e) => setEditProfileData({...editProfileData, hobbies: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Interests</label>
+                      <Input 
+                        value={editProfileData.interests} 
+                        onChange={(e) => setEditProfileData({...editProfileData, interests: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Achievements</label>
+                      <Input 
+                        value={editProfileData.achievements} 
+                        onChange={(e) => setEditProfileData({...editProfileData, achievements: e.target.value})}
+                      />
+                    </div>
                   </div>
                 </div>
                 
@@ -275,9 +341,9 @@ const Profile = () => {
           
           <div className="bg-card rounded-md shadow-sm border border-border p-4">
             <div className="flex flex-col items-center">
-              <Package className="h-8 w-8 text-muted-foreground mb-2" />
+              <Calendar className="h-8 w-8 text-muted-foreground mb-2" />
               <h3 className="font-medium">Joined on</h3>
-              <p className="text-muted-foreground">THU DEC 17 2020</p>
+              <p className="text-muted-foreground">{profileData.joined}</p>
             </div>
           </div>
         </div>

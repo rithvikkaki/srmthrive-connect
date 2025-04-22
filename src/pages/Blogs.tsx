@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { EditIcon, Pencil, FileImage, BarChart2 } from "lucide-react";
+import { EditIcon, Pencil, FileImage, BarChart2, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,6 +26,9 @@ const Blogs = () => {
       comments: 0
     }
   ]);
+
+  const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
+
   const { toast } = useToast();
 
   const handleSubmitPost = () => {
@@ -69,6 +71,16 @@ const Blogs = () => {
       title: "Blog published",
       description: "Your blog post has been successfully published",
     });
+  };
+
+  const handleDeleteBlog = (blogId: string) => {
+    setBlogs(current => current.filter(blog => blog.id !== blogId));
+    toast({
+      title: "Blog deleted",
+      description: "Your blog post has been deleted",
+      variant: "destructive",
+    });
+    setBlogToDelete(null);
   };
 
   return (
@@ -143,16 +155,30 @@ const Blogs = () => {
           
           <div className="space-y-6">
             {blogs.map(blog => (
-              <Post 
-                key={blog.id}
-                id={blog.id}
-                author={blog.author}
-                timeAgo={blog.timeAgo}
-                content={blog.content}
-                image={blog.image}
-                likes={blog.likes}
-                comments={blog.comments}
-              />
+              <div className="relative" key={blog.id}>
+                <Post 
+                  id={blog.id}
+                  author={blog.author}
+                  timeAgo={blog.timeAgo}
+                  content={blog.content}
+                  image={blog.image}
+                  likes={blog.likes}
+                  comments={blog.comments}
+                />
+                {/* Blog menu for deleting (three dots) */}
+                <div className="absolute top-2 right-2 z-10">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setBlogToDelete(blog.id)}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                  {blogToDelete === blog.id && (
+                    <div className="absolute right-10 top-2 bg-white border shadow-md rounded-lg p-2">
+                      <button className="flex items-center text-red-500 gap-2" onClick={() => handleDeleteBlog(blog.id)}>
+                        <Trash2 className="h-4 w-4" /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </div>

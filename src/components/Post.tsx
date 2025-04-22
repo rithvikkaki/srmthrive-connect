@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send } from "lucide-react";
@@ -55,11 +54,7 @@ const Post = ({
   const { toast } = useToast();
 
   const handleLike = () => {
-    if (liked) {
-      setLikeCount(prev => prev - 1);
-    } else {
-      setLikeCount(prev => prev + 1);
-    }
+    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
     setLiked(!liked);
   };
 
@@ -72,15 +67,19 @@ const Post = ({
   };
 
   const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href + `?post=${id}`);
     toast({
-      title: "Post shared",
-      description: "This post has been shared successfully",
+      title: "Post link copied to clipboard",
+      description: "Share it with your friends!",
     });
   };
 
   const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    
+    if (!commentText.trim()) {
+      toast({ variant: "destructive", title: "Error", description: "Comment cannot be empty." });
+      return;
+    }
+
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       author: {
@@ -91,8 +90,8 @@ const Post = ({
       content: commentText,
       timeAgo: "just now"
     };
-    
-    setCommentsList(prev => [newComment, ...prev]);
+
+    setCommentsList([newComment, ...commentsList]);
     setCommentText("");
   };
 
@@ -206,7 +205,7 @@ const Post = ({
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className="flex-1 h-9"
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleAddComment();
                     }
@@ -256,10 +255,9 @@ const Post = ({
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 };
-
 export default Post;
