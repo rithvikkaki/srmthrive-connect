@@ -1,6 +1,7 @@
+
 import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
-import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
+import { Textarea } from "@/components/ui/textarea";
 
 const Profile = () => {
   const { id } = useParams();
@@ -16,12 +18,41 @@ const Profile = () => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: "Rithvik Kaki",
+    bio: "Student | MERN Stack",
+    department: "CS",
+    university: "SRM University",
+    year: "4"
+  });
+  const [editProfileData, setEditProfileData] = useState({
+    name: "Rithvik Kaki",
+    bio: "Student | MERN Stack",
+    department: "CS",
+    university: "SRM University",
+    year: "4"
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleSubmitPost = () => {
-    // Would handle post submission in a real app
+    if (!postText.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Post content cannot be empty",
+      });
+      return;
+    }
+
+    // Create a new post
+    toast({
+      title: "Post created",
+      description: "Your post has been successfully published",
+    });
     setPostText("");
+    // In a real app, you would save this to a database
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +114,25 @@ const Profile = () => {
     }
   };
 
+  const handleEditProfile = () => {
+    setEditProfileData({...profileData});
+    setIsEditing(true);
+  };
+
+  const saveProfileChanges = () => {
+    setProfileData({...editProfileData});
+    setIsEditing(false);
+    toast({
+      title: "Profile updated",
+      description: "Your profile details have been successfully updated",
+    });
+  };
+
+  const cancelEditProfile = () => {
+    setEditProfileData({...profileData});
+    setIsEditing(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-black/90 rounded-lg overflow-hidden">
@@ -91,8 +141,8 @@ const Profile = () => {
           <div className="absolute -top-16 left-6 w-32 h-32 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 p-1">
             <div className="w-full h-full rounded-full overflow-hidden relative group cursor-pointer" onClick={triggerFileInput}>
               <Avatar className="w-full h-full">
-                <AvatarImage src={avatarUrl} alt="Rithvik Kaki" className="w-full h-full object-cover" />
-                <AvatarFallback>RK</AvatarFallback>
+                <AvatarImage src={avatarUrl} alt={profileData.name} className="w-full h-full object-cover" />
+                <AvatarFallback>{profileData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Upload className="h-6 w-6 text-white" />
@@ -110,15 +160,19 @@ const Profile = () => {
           
           <div className="flex justify-between items-start pt-16">
             <div className="text-white">
-              <h1 className="text-3xl font-bold">Rithvik Kaki</h1>
+              <h1 className="text-3xl font-bold">{profileData.name}</h1>
               <div className="flex gap-4 text-white/80 mt-1">
                 <span>3 Posts</span>
                 <span>3 Blogs</span>
                 <span>6 Friends</span>
               </div>
-              <p className="text-white/60 mt-1">Student | MERN Stack</p>
+              <p className="text-white/60 mt-1">{profileData.bio}</p>
             </div>
-            <Button variant="outline" className="text-white border-white/20 hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className="text-white border-white/20 hover:bg-white/10"
+              onClick={handleEditProfile}
+            >
               EDIT
             </Button>
           </div>
@@ -128,24 +182,95 @@ const Profile = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-6">
           <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm uppercase text-muted-foreground mb-1">STUDENT</h3>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">CS</p>
-                    <p className="text-sm text-muted-foreground">SRM University</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">Year 4</p>
+            {!isEditing ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm uppercase text-muted-foreground mb-1">STUDENT</h3>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">{profileData.department}</p>
+                      <p className="text-sm text-muted-foreground">{profileData.university}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">Year {profileData.year}</p>
+                    </div>
                   </div>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-thrive-500"
+                  onClick={handleEditProfile}
+                >
+                  EDIT
+                </Button>
               </div>
-              
-              <Button variant="outline" size="sm" className="text-thrive-500">
-                EDIT
-              </Button>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm uppercase text-muted-foreground mb-1">EDIT PROFILE</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm text-muted-foreground">Name</label>
+                      <Input 
+                        value={editProfileData.name} 
+                        onChange={(e) => setEditProfileData({...editProfileData, name: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Bio</label>
+                      <Input 
+                        value={editProfileData.bio} 
+                        onChange={(e) => setEditProfileData({...editProfileData, bio: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Department</label>
+                      <Input 
+                        value={editProfileData.department} 
+                        onChange={(e) => setEditProfileData({...editProfileData, department: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">University</label>
+                      <Input 
+                        value={editProfileData.university} 
+                        onChange={(e) => setEditProfileData({...editProfileData, university: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Year</label>
+                      <Input 
+                        value={editProfileData.year} 
+                        onChange={(e) => setEditProfileData({...editProfileData, year: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-destructive"
+                    onClick={cancelEditProfile}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    CANCEL
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="bg-thrive-500 hover:bg-thrive-600"
+                    onClick={saveProfileChanges}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    SAVE
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="bg-card rounded-md shadow-sm border border-border p-4">
@@ -162,13 +287,13 @@ const Profile = () => {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full overflow-hidden">
                 <img 
-                  src="https://i.pravatar.cc/100?img=12" 
-                  alt="Rithvik Kaki"
+                  src={avatarUrl} 
+                  alt={profileData.name}
                   className="w-full h-full object-cover"
                 />
               </div>
               <Input
-                placeholder="WHAT'S ON YOUR MIND? RITHVIK KAKI"
+                placeholder={`WHAT'S ON YOUR MIND? ${profileData.name.toUpperCase()}`}
                 value={postText}
                 onChange={(e) => setPostText(e.target.value)}
                 className="flex-1"
@@ -185,17 +310,25 @@ const Profile = () => {
                 <span>CREATE POST</span>
               </Button>
               
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-              >
-                <Pencil className="h-4 w-4" />
-                <span>WRITE BLOG</span>
-              </Button>
+              <Link to="/app/blogs" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2 w-full"
+                >
+                  <Pencil className="h-4 w-4" />
+                  <span>WRITE BLOG</span>
+                </Button>
+              </Link>
               
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 flex-1"
+                onClick={() => {
+                  toast({
+                    title: "Coming Soon",
+                    description: "This feature is under development",
+                  });
+                }}
               >
                 <FileImage className="h-4 w-4" />
                 <span>POST AD</span>
@@ -204,6 +337,12 @@ const Profile = () => {
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 flex-1"
+                onClick={() => {
+                  toast({
+                    title: "Coming Soon",
+                    description: "Poll feature is under development",
+                  });
+                }}
               >
                 <BarChart2 className="h-4 w-4" />
                 <span>POLL</span>

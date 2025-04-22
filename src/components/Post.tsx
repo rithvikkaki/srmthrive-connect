@@ -1,9 +1,12 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PostProps {
   id: string;
@@ -21,6 +24,17 @@ interface PostProps {
   isBookmarked?: boolean;
 }
 
+interface Comment {
+  id: string;
+  author: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  content: string;
+  timeAgo: string;
+}
+
 const Post = ({
   id,
   author,
@@ -35,6 +49,10 @@ const Post = ({
   const [liked, setLiked] = useState(isLiked);
   const [likeCount, setLikeCount] = useState(likes);
   const [bookmarked, setBookmarked] = useState(isBookmarked);
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
+  const { toast } = useToast();
 
   const handleLike = () => {
     if (liked) {
@@ -47,6 +65,35 @@ const Post = ({
 
   const handleBookmark = () => {
     setBookmarked(!bookmarked);
+    toast({
+      title: bookmarked ? "Removed from bookmarks" : "Added to bookmarks",
+      description: bookmarked ? "This post has been removed from your bookmarks" : "This post has been added to your bookmarks",
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Post shared",
+      description: "This post has been shared successfully",
+    });
+  };
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    
+    const newComment: Comment = {
+      id: `comment-${Date.now()}`,
+      author: {
+        id: "me",
+        name: "Rithvik Kaki",
+        avatar: "https://i.pravatar.cc/100?img=12"
+      },
+      content: commentText,
+      timeAgo: "just now"
+    };
+    
+    setCommentsList(prev => [newComment, ...prev]);
+    setCommentText("");
   };
 
   return (
@@ -113,15 +160,17 @@ const Post = ({
             variant="ghost" 
             size="sm" 
             className="flex items-center gap-1 flex-1"
+            onClick={() => setShowComments(!showComments)}
           >
             <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs">{comments}</span>
+            <span className="text-xs">{commentsList.length + comments}</span>
           </Button>
           
           <Button 
             variant="ghost" 
             size="sm" 
             className="flex items-center gap-1 flex-1"
+            onClick={handleShare}
           >
             <Share2 className="h-4 w-4 text-muted-foreground" />
           </Button>
@@ -140,6 +189,74 @@ const Post = ({
             />
           </Button>
         </div>
+        
+        {showComments && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Avatar className="w-8 h-8">
+                <img 
+                  src="https://i.pravatar.cc/100?img=12" 
+                  alt="Your avatar"
+                  className="w-full h-full object-cover"
+                />
+              </Avatar>
+              <div className="flex-1 flex items-center gap-2">
+                <Input
+                  placeholder="Write a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1 h-9"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddComment();
+                    }
+                  }}
+                />
+                <Button 
+                  size="sm" 
+                  className="h-9 px-3"
+                  onClick={handleAddComment}
+                  disabled={!commentText.trim()}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {commentsList.map(comment => (
+                <div key={comment.id} className="flex gap-2">
+                  <Avatar className="w-7 h-7">
+                    <img 
+                      src={comment.author.avatar} 
+                      alt={comment.author.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="bg-muted p-2 rounded-md">
+                      <Link to={`/app/profile/${comment.author.id}`} className="text-xs font-medium">
+                        {comment.author.name}
+                      </Link>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <button className="text-xs text-muted-foreground hover:text-foreground">Like</button>
+                      <button className="text-xs text-muted-foreground hover:text-foreground">Reply</button>
+                      <span className="text-xs text-muted-foreground">{comment.timeAgo}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {commentsList.length === 0 && comments === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Be the first to comment on this post
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

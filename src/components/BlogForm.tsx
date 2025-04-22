@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 interface BlogFormProps {
   onClose: () => void;
@@ -15,6 +16,7 @@ const BlogForm = ({ onClose, onSubmit }: BlogFormProps) => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -26,7 +28,30 @@ const BlogForm = ({ onClose, onSubmit }: BlogFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!title.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing title",
+        description: "Please provide a title for your blog post",
+      });
+      return;
+    }
+    
+    if (!content.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing content",
+        description: "Please write some content for your blog post",
+      });
+      return;
+    }
+    
     onSubmit(title, content, image);
+    toast({
+      title: "Blog published",
+      description: "Your blog post has been successfully published",
+    });
   };
 
   return (

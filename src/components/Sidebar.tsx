@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Users, Layers, Calendar, FileText, Bookmark } from "lucide-react";
+import { Users, Layers, Calendar, FileText, Bookmark, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,19 +23,21 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
         <ScrollArea className="h-[calc(100vh-4rem)]">
           <div className="p-4">
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="https://i.pravatar.cc/100?img=12" 
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+              <Link to="/app/profile/me" className="block">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="https://i.pravatar.cc/100?img=12" 
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Rithvik Kaki</h3>
+                    <p className="text-sm text-muted-foreground">Student</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium">Rithvik Kaki</h3>
-                  <p className="text-sm text-muted-foreground">Student</p>
-                </div>
-              </div>
+              </Link>
 
               <nav className="space-y-1">
                 <Link 
@@ -73,6 +75,15 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                   <Bookmark className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium uppercase text-sm">Bookmarks</span>
                 </Link>
+                <a 
+                  href="https://academia.srmist.edu.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors"
+                >
+                  <ExternalLink className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium uppercase text-sm">Academia</span>
+                </a>
               </nav>
 
               <div className="mt-6">
@@ -80,8 +91,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                 <div className="space-y-2">
                   <UpdateCard 
                     title="Practical Exams" 
-                    description="Practical exams for the odd semester will start fr"
-                    link="#"
+                    description="Practical exams for the odd semester will start from April 25th, 2024. All students are required to bring their lab manuals and ID cards."
+                    link="https://academia.srmist.edu.in"
                   />
                 </div>
               </div>
