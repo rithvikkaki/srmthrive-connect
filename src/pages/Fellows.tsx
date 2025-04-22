@@ -1,10 +1,17 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Users } from "lucide-react";
 import UserCard from "@/components/UserCard";
+import MessageModal from "@/components/MessageModal";
+
+const googleForms = [
+  // Add your Google Forms links here; these forms should store responses as desired
+  "https://forms.gle/NUbVtGxoaTT4no8z8",
+  "https://forms.gle/WCxfyu5z5tw5j4hS8",
+  "https://forms.gle/cZKowA4755AVBNo26",
+];
 
 const Fellows = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,6 +75,9 @@ const Fellows = () => {
     }
   ];
 
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedFellow, setSelectedFellow] = useState<{name: string} | null>(null);
+
   const filteredFellows = searchQuery 
     ? fellows.filter(fellow => 
         fellow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,8 +90,44 @@ const Fellows = () => {
     return filteredFellows.filter(fellow => fellow.department === department);
   };
 
+  // Handler to open a random Google Form
+  const handleApplyNow = () => {
+    const randomUrl = googleForms[Math.floor(Math.random() * googleForms.length)];
+    window.open(randomUrl, "_blank");
+  };
+
+  // Helper for rendering user actions (Message, Apply)
+  const FellowActions = ({fellow}: {fellow: {name: string}}) => (
+    <div className="flex space-x-2 mt-2">
+      <button
+        onClick={() => { setSelectedFellow(fellow); setMessageModalOpen(true); }}
+        className="text-xs px-3 py-1 bg-thrive-500 text-white rounded hover:bg-thrive-600 transition"
+      >
+        Message
+      </button>
+      <button
+        onClick={handleApplyNow}
+        className="text-xs px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-800 transition"
+      >
+        Apply Now
+      </button>
+    </div>
+  );
+
   return (
     <div className="container mx-auto">
+      {/* Youtube link at the top */}
+      <div className="flex gap-3 items-center mb-4">
+        <a
+          href="https://www.youtube.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline font-semibold hover:text-blue-800"
+        >
+          Watch on YouTube
+        </a>
+      </div>
+      
       <div className="flex items-center gap-2 mb-6">
         <Users className="h-6 w-6 text-thrive-500" />
         <h1 className="text-3xl font-bold">SRMThrive Fellows</h1>
@@ -111,13 +157,15 @@ const Fellows = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredFellows.map(fellow => (
-                  <UserCard 
-                    key={fellow.id}
-                    id={fellow.id}
-                    name={fellow.name}
-                    role={fellow.role}
-                    avatar={fellow.avatar}
-                  />
+                  <div key={fellow.id} className="flex flex-col border rounded-md px-4 py-4 bg-background shadow hover:scale-105 transition-transform">
+                    <UserCard 
+                      id={fellow.id}
+                      name={fellow.name}
+                      role={fellow.role}
+                      avatar={fellow.avatar}
+                    />
+                    <FellowActions fellow={fellow} />
+                  </div>
                 ))}
                 {filteredFellows.length === 0 && (
                   <p className="text-muted-foreground col-span-3 text-center py-8">
@@ -134,13 +182,15 @@ const Fellows = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredByDepartment("Computer Science").map(fellow => (
-                  <UserCard 
-                    key={fellow.id}
-                    id={fellow.id}
-                    name={fellow.name}
-                    role={fellow.role}
-                    avatar={fellow.avatar}
-                  />
+                  <div key={fellow.id} className="flex flex-col border rounded-md px-4 py-4 bg-background shadow hover:scale-105 transition-transform">
+                    <UserCard 
+                      id={fellow.id}
+                      name={fellow.name}
+                      role={fellow.role}
+                      avatar={fellow.avatar}
+                    />
+                    <FellowActions fellow={fellow} />
+                  </div>
                 ))}
                 {getFilteredByDepartment("Computer Science").length === 0 && (
                   <p className="text-muted-foreground col-span-3 text-center py-8">
@@ -157,13 +207,15 @@ const Fellows = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredByDepartment("Civil Engineering").map(fellow => (
-                  <UserCard 
-                    key={fellow.id}
-                    id={fellow.id}
-                    name={fellow.name}
-                    role={fellow.role}
-                    avatar={fellow.avatar}
-                  />
+                  <div key={fellow.id} className="flex flex-col border rounded-md px-4 py-4 bg-background shadow hover:scale-105 transition-transform">
+                    <UserCard 
+                      id={fellow.id}
+                      name={fellow.name}
+                      role={fellow.role}
+                      avatar={fellow.avatar}
+                    />
+                    <FellowActions fellow={fellow} />
+                  </div>
                 ))}
                 {getFilteredByDepartment("Civil Engineering").length === 0 && (
                   <p className="text-muted-foreground col-span-3 text-center py-8">
@@ -180,13 +232,15 @@ const Fellows = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredByDepartment("Electrical Engineering").map(fellow => (
-                  <UserCard 
-                    key={fellow.id}
-                    id={fellow.id}
-                    name={fellow.name}
-                    role={fellow.role}
-                    avatar={fellow.avatar}
-                  />
+                  <div key={fellow.id} className="flex flex-col border rounded-md px-4 py-4 bg-background shadow hover:scale-105 transition-transform">
+                    <UserCard 
+                      id={fellow.id}
+                      name={fellow.name}
+                      role={fellow.role}
+                      avatar={fellow.avatar}
+                    />
+                    <FellowActions fellow={fellow} />
+                  </div>
                 ))}
                 {getFilteredByDepartment("Electrical Engineering").length === 0 && (
                   <p className="text-muted-foreground col-span-3 text-center py-8">
@@ -203,13 +257,15 @@ const Fellows = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredByDepartment("Mechanical Engineering").map(fellow => (
-                  <UserCard 
-                    key={fellow.id}
-                    id={fellow.id}
-                    name={fellow.name}
-                    role={fellow.role}
-                    avatar={fellow.avatar}
-                  />
+                  <div key={fellow.id} className="flex flex-col border rounded-md px-4 py-4 bg-background shadow hover:scale-105 transition-transform">
+                    <UserCard 
+                      id={fellow.id}
+                      name={fellow.name}
+                      role={fellow.role}
+                      avatar={fellow.avatar}
+                    />
+                    <FellowActions fellow={fellow} />
+                  </div>
                 ))}
                 {getFilteredByDepartment("Mechanical Engineering").length === 0 && (
                   <p className="text-muted-foreground col-span-3 text-center py-8">
@@ -221,6 +277,15 @@ const Fellows = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Message Modal */}
+      {selectedFellow && (
+        <MessageModal
+          open={messageModalOpen}
+          onClose={() => { setMessageModalOpen(false); setSelectedFellow(null); }}
+          fellowName={selectedFellow.name}
+        />
+      )}
     </div>
   );
 };
