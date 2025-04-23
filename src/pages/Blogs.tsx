@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { EditIcon, Pencil, BarChart2, FileImage } from "lucide-react";
+import { EditIcon, Pencil, BarChart2, FileImage, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -67,6 +68,7 @@ const Blogs = () => {
   const [showPostModal, setShowPostModal] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showPollModal, setShowPollModal] = useState(false);
+  const [showBlogModal, setShowBlogModal] = useState(false);
   const { toast } = useToast();
 
   const [postText, setPostText] = useState("");
@@ -80,6 +82,13 @@ const Blogs = () => {
   };
   // For polls
   const handleCreatePoll = (poll: any) => setPolls([poll, ...polls]);
+
+  // Blog button handler, use the blog modal (identical to post for now)
+  const handleBlogButtonClick = () => setShowBlogModal(true);
+  const handleCreateBlog = (post: any) => {
+    setPosts([post, ...posts]);
+    toast({ title: "Blog published", description: "Your blog post is live." });
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -98,6 +107,14 @@ const Blogs = () => {
           >
             <EditIcon className="h-4 w-4" />
             CREATE POST
+          </Button>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={handleBlogButtonClick}
+          >
+            <BookOpen className="h-4 w-4" />
+            BLOG
           </Button>
           <Button
             variant="outline"
@@ -125,6 +142,16 @@ const Blogs = () => {
         username={username}
         avatarUrl={avatarUrl}
       />
+
+      {/* Blog Modal uses same PostCreateModal for now */}
+      <PostCreateModal
+        open={showBlogModal}
+        onOpenChange={setShowBlogModal}
+        onCreate={handleCreateBlog}
+        username={username}
+        avatarUrl={avatarUrl}
+      />
+
       <AdCreateModal
         open={showAdModal}
         onOpenChange={setShowAdModal}
