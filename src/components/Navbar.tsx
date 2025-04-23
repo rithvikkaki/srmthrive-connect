@@ -3,6 +3,14 @@ import { Link } from "react-router-dom";
 import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
   sidebarOpen: boolean;
@@ -32,7 +40,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
               </h1>
             </Link>
           </div>
-
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/app" className="nav-link">
               <Home className="w-6 h-6 text-thrive-500" />
@@ -46,9 +53,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
             <Link to="/app/notices" className="nav-link">
               <GraduationCap className="w-6 h-6" />
             </Link>
-            {/* Txt2YT link REMOVED here */}
           </div>
-
           <div className="flex items-center gap-4">
             <div className="relative w-64 hidden md:block">
               <Input 
@@ -58,10 +63,21 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
               />
               <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
             </div>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-thrive-500"></span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative focus:ring-2 focus:ring-thrive-200/60" aria-label="Notifications">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-thrive-500"></span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[99] w-80">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                  No notifications yet
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link to="/app/profile/me">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 flex items-center justify-center overflow-hidden">
                 <img 
