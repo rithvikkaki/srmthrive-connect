@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const [institutionName, setInstitutionName] = useState("SRM University");
@@ -16,18 +16,49 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Store user credentials in localStorage for basic authentication
-    localStorage.setItem("srm-user-email", email);
-    localStorage.setItem("srm-user-password", password);
-    
+
+    // Register user with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: institutionName, // You can change if needed
+          registrationNo,
+          collegeId,
+        },
+      }
+    });
+
+    if (error) {
+      toast({
+        title: "Sign up error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!data?.user) {
+      toast({
+        title: "Registration failed",
+        description: "User could not be created.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Automatically assign default "user" role in user_roles
+    await supabase
+      .from("user_roles")
+      .insert([{ user_id: data.user.id, role: "user" }]);
+
     toast({
       title: "Account created successfully",
-      description: "Please login with your credentials",
+      description: "Please log in with your credentials.",
     });
-    
-    // Redirect to login page
+
     navigate("/login");
   };
 

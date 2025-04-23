@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,23 +13,26 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const storedEmail = localStorage.getItem("srm-user-email");
-    const storedPassword = localStorage.getItem("srm-user-password");
-    
-    if (email === storedEmail && password === storedPassword) {
-      // Set logged in status
-      localStorage.setItem("srm-user-logged-in", "true");
-      navigate("/app");
-    } else {
+
+    // Supabase Auth login
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error.message || "Invalid email or password. Please try again.",
       });
+      return;
     }
+
+    // Supabase event will handle redirect via auth state in Root/App
+    navigate("/app");
   };
 
   return (
