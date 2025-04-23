@@ -117,6 +117,16 @@ const FellowAIChatModal = ({
     if (!open) setMessages([]);
   }, [open, fellow]);
 
+  // Add this helper function that both sets the input and triggers sending the message
+  const handleExampleClick = async (q: string) => {
+    setInput(q);
+    // Wait for input state to update, then send
+    // Using a microtask to ensure state update
+    setTimeout(() => {
+      handleSend();
+    }, 0);
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="max-w-md w-full p-0 flex flex-col">
@@ -143,7 +153,7 @@ const FellowAIChatModal = ({
                   <button
                     key={q}
                     className="bg-white text-gray-700 border px-3 py-1 rounded-full text-xs shadow hover:bg-gray-100"
-                    onClick={() => setInput(q)}
+                    onClick={() => handleExampleClick(q)}
                   >
                     {q}
                   </button>
