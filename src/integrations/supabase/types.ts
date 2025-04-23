@@ -416,22 +416,58 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about_me: string | null
+          achievements: string | null
           avatar_url: string | null
+          bio: string | null
+          course: string | null
           created_at: string
+          department: string | null
           full_name: string | null
+          hobbies: string[] | null
           id: string
+          interests: string[] | null
+          joined: string | null
+          program: string | null
+          role: string | null
+          university: string | null
+          year: string | null
         }
         Insert: {
+          about_me?: string | null
+          achievements?: string | null
           avatar_url?: string | null
+          bio?: string | null
+          course?: string | null
           created_at?: string
+          department?: string | null
           full_name?: string | null
+          hobbies?: string[] | null
           id: string
+          interests?: string[] | null
+          joined?: string | null
+          program?: string | null
+          role?: string | null
+          university?: string | null
+          year?: string | null
         }
         Update: {
+          about_me?: string | null
+          achievements?: string | null
           avatar_url?: string | null
+          bio?: string | null
+          course?: string | null
           created_at?: string
+          department?: string | null
           full_name?: string | null
+          hobbies?: string[] | null
           id?: string
+          interests?: string[] | null
+          joined?: string | null
+          program?: string | null
+          role?: string | null
+          university?: string | null
+          year?: string | null
         }
         Relationships: []
       }
