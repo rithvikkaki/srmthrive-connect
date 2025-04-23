@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Send } from "lucide-react";
@@ -20,7 +21,7 @@ interface Message {
   content: string;
   sender: "me" | "ai";
   createdAt: Date;
-  status?: "pending" | "done";
+  status?: "pending" | "done" | "error";
 }
 
 const EXAMPLE_QUESTIONS = [
@@ -39,6 +40,7 @@ const FellowAIChatModal = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null); // ADDED
   const { getGeminiReply, loading } = useGeminiReply();
   const chatBodyRef = useRef<HTMLDivElement>(null);
 
@@ -63,16 +65,18 @@ const FellowAIChatModal = ({
     ]);
   };
 
-  const updatePendingAiMessage = (realText: string | null) => {
+  const updatePendingAiMessage = (realText: string | null, errorMsg?: string) => {
     setMessages(msgs => 
       msgs.map(m => 
         m.id === "pending-ai"
           ? {
               ...m,
-              content: realText && realText.trim() !== ""
-                ? realText
-                : "Sorry, I could not generate a reply right now. Please try again with a different question.",
-              status: "done"
+              content: errorMsg
+                ? errorMsg
+                : realText && realText.trim() !== ""
+                  ? realText
+                  : "Sorry, I could not generate a reply right now. Please try again with a different question.",
+              status: errorMsg ? "error" : "done"
             }
           : m
       )
@@ -84,6 +88,7 @@ const FellowAIChatModal = ({
   };
 
   const handleSend = async (customMessage?: string) => {
+    setAiError(null); // Reset error state
     const msgToSend = typeof customMessage === "string" ? customMessage : input.trim();
     if (!msgToSend || sending) return;
     const userMsg: Message = {
@@ -102,13 +107,28 @@ const FellowAIChatModal = ({
     // AI reply with Gemini
     let aiText = "";
     try {
+      console.log("[Gemini] Sending to edge function:", userMsg.content);
       aiText = await getGeminiReply({ message: userMsg.content });
-    } catch (e) {
-      aiText = "Sorry, Gemini could not reply due to an error.";
+      console.log("[Gemini] Raw reply:", aiText);
+      // Show error on null, undefined, or error message string
+      if (
+        !aiText ||
+        aiText.toLowerCase().startsWith("error") ||
+        aiText.includes("Gemini backend")
+      ) {
+        setAiError(
+          typeof aiText === "string"
+            ? aiText
+            : "Could not get a valid reply from Gemini. Please try again later."
+        );
+        updatePendingAiMessage(null, aiText || undefined);
+      } else {
+        updatePendingAiMessage(aiText);
+      }
+    } catch (e: any) {
+      setAiError("Gemini failed to reply. " + (e?.message || ""));
+      updatePendingAiMessage(null, "Gemini failed to reply. " + (e?.message || ""));
     }
-
-    // Update the pending message to the real reply
-    updatePendingAiMessage(aiText);
 
     setSending(false);
   };
@@ -116,6 +136,7 @@ const FellowAIChatModal = ({
   // Reset messages when switching fellow or closing
   useEffect(() => {
     if (!open) setMessages([]);
+    setAiError(null);
   }, [open, fellow]);
 
   // Update to directly call handleSend with the example question as param
@@ -169,17 +190,25 @@ const FellowAIChatModal = ({
                   ? "bg-[#DCF8C6] text-gray-800"
                   : msg.status === "pending"
                     ? "bg-gray-200 text-gray-500 italic"
-                    : "bg-white dark:bg-muted text-gray-900 dark:text-gray-50"}`}
+                    : msg.status === "error"
+                      ? "bg-red-100 text-red-500"
+                      : "bg-white dark:bg-muted text-gray-900 dark:text-gray-50"}`}
               >
                 {msg.content}
                 <div className="text-[10px] leading-tight text-right opacity-60 mt-1">
-                  {msg.status === "pending"
+                  {msg.status === "pending" || msg.status === "error"
                     ? ""
                     : msg.createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
             </div>
           ))}
+          {/* Error OUTSIDE message list */}
+          {aiError && (
+            <div className="text-xs text-red-500 mt-2 text-center">
+              {aiError}
+            </div>
+          )}
         </div>
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-t bg-white">
           <input
@@ -205,3 +234,4 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
+
