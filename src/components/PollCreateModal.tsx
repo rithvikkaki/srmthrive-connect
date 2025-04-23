@@ -33,7 +33,7 @@ const MIN_OPTIONS = 2;
 const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, onCreate }) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
-  const [duration, setDuration] = useState<number | "custom">(DURATION_OPTIONS[0].value);
+  const [duration, setDuration] = useState<number | "custom">(DURATION_OPTIONS[0].value as number);
   const [customDuration, setCustomDuration] = useState(1);
   const [visibility, setVisibility] = useState("public");
   const [type, setType] = useState("single");
@@ -72,7 +72,7 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
       });
       setQuestion("");
       setOptions(["", ""]);
-      setDuration(DURATION_OPTIONS[0].value);
+      setDuration(DURATION_OPTIONS[0].value as number);
       setCustomDuration(1);
       setVisibility("public");
       setType("single");
@@ -127,7 +127,7 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
               <button
                 key={opt.value}
                 className={`px-3 py-1 rounded text-xs border ${duration === opt.value ? "bg-[#9b87f5] text-white border-[#9b87f5]" : "border-border bg-muted"}`}
-                onClick={() => setDuration(opt.value)}
+                onClick={() => setDuration(opt.value === "custom" ? "custom" : Number(opt.value))}
                 disabled={loading}
                 type="button"
               >
