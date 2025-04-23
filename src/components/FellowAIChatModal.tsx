@@ -21,6 +21,7 @@ interface Message {
   content: string;
   sender: "me" | "ai";
   createdAt: Date;
+  status?: "pending" | "done";
 }
 
 const EXAMPLE_QUESTIONS = [
@@ -49,6 +50,40 @@ const FellowAIChatModal = ({
     }
   }, [messages, open]);
 
+  // Helper to add a pending AI loading bubble
+  const addPendingAiMessage = () => {
+    setMessages(msgs => [
+      ...msgs,
+      {
+        id: "pending-ai",
+        content: "Gemini is typing...",
+        sender: "ai",
+        createdAt: new Date(),
+        status: "pending"
+      }
+    ]);
+  };
+
+  const updatePendingAiMessage = (realText: string | null) => {
+    setMessages(msgs => 
+      msgs.map(m => 
+        m.id === "pending-ai"
+          ? {
+              ...m,
+              content: realText && realText.trim() !== ""
+                ? realText
+                : "Sorry, I could not generate a reply right now. Please try again with a different question.",
+              status: "done"
+            }
+          : m
+      )
+    );
+  };
+
+  const removePendingAiMessage = () => {
+    setMessages(msgs => msgs.filter(m => m.id !== "pending-ai"));
+  };
+
   const handleSend = async () => {
     if (!input.trim() || sending) return;
     const userMsg: Message = {
@@ -61,15 +96,20 @@ const FellowAIChatModal = ({
     setInput("");
     setSending(true);
 
+    // Add AI's "typing" bubble
+    addPendingAiMessage();
+
     // AI reply with Gemini
-    const aiText = await getGeminiReply({ message: input.trim(), apiKey: geminiApiKey });
-    const aiMsg: Message = {
-      id: Math.random().toString(36).slice(2),
-      content: aiText,
-      sender: "ai",
-      createdAt: new Date(),
-    };
-    setMessages((msgs) => [...msgs, aiMsg]);
+    let aiText = "";
+    try {
+      aiText = await getGeminiReply({ message: userMsg.content, apiKey: geminiApiKey });
+    } catch (e) {
+      aiText = "Sorry, Gemini could not reply due to an error.";
+    }
+
+    // Update the pending message to the real reply
+    updatePendingAiMessage(aiText);
+
     setSending(false);
   };
 
@@ -121,11 +161,15 @@ const FellowAIChatModal = ({
                 className={`rounded-lg px-3 py-2 my-1 max-w-[70%] shadow text-sm break-words
                 ${msg.sender === "me"
                   ? "bg-[#DCF8C6] text-gray-800"
-                  : "bg-white dark:bg-muted text-gray-900 dark:text-gray-50"}`}
+                  : msg.status === "pending"
+                    ? "bg-gray-200 text-gray-500 italic"
+                    : "bg-white dark:bg-muted text-gray-900 dark:text-gray-50"}`}
               >
                 {msg.content}
                 <div className="text-[10px] leading-tight text-right opacity-60 mt-1">
-                  {msg.createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {msg.status === "pending"
+                    ? ""
+                    : msg.createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
             </div>
@@ -155,3 +199,4 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
+
