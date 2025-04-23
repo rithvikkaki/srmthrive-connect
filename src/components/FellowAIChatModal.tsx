@@ -42,6 +42,7 @@ const FellowAIChatModal = ({
   const [aiError, setAiError] = useState<string | null>(null);
   const { getGeminiReply, loading } = useGeminiReply();
   const chatBodyRef = useRef<HTMLDivElement>(null);
+  const lastSentRef = useRef<number>(0);
 
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -49,7 +50,6 @@ const FellowAIChatModal = ({
     }
   }, [messages, open]);
 
-  // Helper to add a pending AI loading bubble
   const addPendingAiMessage = () => {
     setMessages(msgs => [
       ...msgs,
@@ -81,19 +81,31 @@ const FellowAIChatModal = ({
     );
   };
 
-  // Add log here to confirm function call
+  // Helper function for warning toasts (uses shadcn/ui toast)
+  function showToast(msg: string) {
+    // @ts-ignore
+    if (window && window.toast) {
+      // If you have a global toast from shadcn/ui
+      window.toast(msg, { variant: "warning" });
+    } else {
+      alert(msg); // fallback (can swap if you use shadcn/ui's actual toast)
+    }
+  }
+
+  // Allow sending even if already sending. Spam protection: warn if sending too quickly.
   const handleSend = async (customMessage?: string) => {
-    console.log("handleSend called; sending:", sending, "loading:", loading, "input:", input);
     setAiError(null); // Reset error state
     const msgToSend = typeof customMessage === "string" ? customMessage : input.trim();
     if (!msgToSend) {
-      console.log("Blocked: empty message");
       return;
     }
-    if (sending || loading) {
-      console.log("Blocked: already sending or loading");
-      return;
+    // Very basic rate limit: warn if sent <0.75s apart
+    const now = Date.now();
+    if (now - lastSentRef.current < 750) {
+      showToast("You're sending messages too quickly! Please slow down.");
     }
+    lastSentRef.current = now;
+
     const userMsg: Message = {
       id: Math.random().toString(36).slice(2),
       content: msgToSend,
@@ -102,17 +114,14 @@ const FellowAIChatModal = ({
     };
     setMessages((msgs) => [...msgs, userMsg]);
     if (!customMessage) setInput("");
-    setSending(true);
 
-    // Add AI's "typing" bubble
+    setSending(true);
     addPendingAiMessage();
 
     // AI reply with Gemini
     let aiText = "";
     try {
-      console.log("[Gemini] Sending to edge function:", userMsg.content);
       aiText = await getGeminiReply({ message: userMsg.content });
-      console.log("[Gemini] Raw reply:", aiText);
       if (
         !aiText ||
         aiText.toLowerCase().startsWith("error") ||
@@ -128,29 +137,23 @@ const FellowAIChatModal = ({
         updatePendingAiMessage(aiText);
       }
     } catch (e: any) {
-      console.error("Gemini failed to reply:", e);
       setAiError("Gemini failed to reply. " + (e?.message || ""));
       updatePendingAiMessage(null, "Gemini failed to reply. " + (e?.message || ""));
     }
-
     setSending(false);
-    console.log("handleSend exiting; messages:", messages);
   };
 
-  // Reset messages when switching fellow or closing
   useEffect(() => {
     if (!open) setMessages([]);
     setAiError(null);
   }, [open, fellow]);
 
-  // To diagnose Enter key, use a separate handler
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !sending && !loading) {
+    if (e.key === "Enter" /* allow sending always, even if busy, only block if input empty */ && input.trim()) {
       handleSend();
     }
   };
 
-  // Update to directly call handleSend with the example question as param
   const handleExampleClick = (q: string) => {
     handleSend(q);
     setInput("");
@@ -227,12 +230,12 @@ const FellowAIChatModal = ({
             className="flex-1 rounded-full px-4 py-2 border focus:outline-none text-sm"
             placeholder="Type a message"
             onKeyDown={handleInputKeyDown}
-            disabled={sending || loading}
+            disabled={false} // Always enabled
             aria-label="Type a message"
           />
           <button
             onClick={() => handleSend()}
-            disabled={sending || loading || !input.trim()}
+            disabled={!input.trim()} // Only disable if input is empty
             className="p-2 bg-[#25d366] rounded-full text-white hover:bg-[#22ba5b] transition-colors"
             aria-label="Send"
           >
