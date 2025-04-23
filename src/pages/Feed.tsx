@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
-import { EditIcon, FileImage, BarChart2, Plus } from "lucide-react";
+
+import React, { useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
@@ -8,10 +9,8 @@ import UserCard from "@/components/UserCard";
 import BlogForm from "@/components/BlogForm";
 import PostCreateModal from "@/components/PostCreateModal";
 
-const MAX_LENGTH = 500;
-
 const Feed = () => {
-  // FEED POSTS -- updated post photo flow
+  // FEED POSTS -- concise and type-consistent
   const [posts, setPosts] = useState([
     {
       id: "1",
@@ -24,7 +23,7 @@ const Feed = () => {
       images: undefined,
       isLiked: false,
       tags: [],
-      privacy: "public"
+      privacy: "public",
     },
     {
       id: "2",
@@ -37,7 +36,7 @@ const Feed = () => {
       images: undefined,
       isLiked: true,
       tags: [],
-      privacy: "public"
+      privacy: "public",
     },
     {
       id: "3",
@@ -50,7 +49,7 @@ const Feed = () => {
       images: undefined,
       isLiked: false,
       tags: [],
-      privacy: "public"
+      privacy: "public",
     },
     {
       id: "4",
@@ -63,8 +62,8 @@ const Feed = () => {
       comments: 0,
       isLiked: false,
       tags: [],
-      privacy: "public"
-    }
+      privacy: "public",
+    },
   ]);
   const [showPostModal, setShowPostModal] = useState(false);
   const [showBlogForm, setShowBlogForm] = useState(false);
@@ -74,25 +73,22 @@ const Feed = () => {
   const username = posts.find(p => p.author.id === "4")?.author.name || "Rithvik Kaki";
   const avatarUrl = posts.find(p => p.author.id === "4")?.author.avatar || "https://i.pravatar.cc/100?img=12";
 
-  const handleCreatePost = (post: any) => {
-    setPosts([post, ...posts]);
-  };
+  const handleCreatePost = (post: any) => setPosts([post, ...posts]);
 
   const handleBlogSubmit = (title: string, content: string, image: File | null) => {
     const newPost = {
       id: `blog-${Date.now()}`,
-      author: {
-        id: "4",
-        name: "Rithvik Kaki",
-        avatar: avatarUrl
-      },
+      author: { id: "4", name: "Rithvik Kaki", avatar: avatarUrl },
       timeAgo: "just now",
       content: `${title}\n\n${content}`,
       likes: 0,
       comments: 0,
-      image: image ? URL.createObjectURL(image) : undefined
+      image: image ? URL.createObjectURL(image) : undefined,
+      images: undefined,
+      isLiked: false,
+      tags: [],
+      privacy: "public",
     };
-
     setPosts([newPost, ...posts]);
     setShowBlogForm(false);
     toast({
@@ -120,10 +116,8 @@ const Feed = () => {
         username={username}
         avatarUrl={avatarUrl}
       />
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          {/* Old post bar is removed! Use FAB above */}
           <div className="space-y-6">
             {posts.map(post => (
               <Post
@@ -143,7 +137,6 @@ const Feed = () => {
             ))}
           </div>
         </div>
-
         <div className="space-y-6">
           <div>
             <h3 className="font-medium mb-3">Polls</h3>
@@ -153,7 +146,7 @@ const Feed = () => {
               description="Friday party. Are you guys ready?"
               options={[
                 { id: "1", text: "YES", votes: 12, percentage: 62 },
-                { id: "2", text: "NO", votes: 8, percentage: 38 }
+                { id: "2", text: "NO", votes: 8, percentage: 38 },
               ]}
             />
           </div>
@@ -163,38 +156,12 @@ const Feed = () => {
             </div>
             <div className="bg-card rounded-md shadow-sm border border-border p-4">
               <h4 className="font-medium mb-3">Fellows</h4>
-              {/* Fellows list—remove "Apply now" button/logic */}
               <div className="space-y-3">
-                <UserCard
-                  id="1"
-                  name="Naina Upadhyay"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=5"
-                />
-                <UserCard
-                  id="2"
-                  name="Wonder Woman"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=32"
-                />
-                <UserCard
-                  id="3"
-                  name="Bill Gates"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=60"
-                />
-                <UserCard
-                  id="4"
-                  name="Devesh Kumar Singh"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=15"
-                />
-                <UserCard
-                  id="5"
-                  name="Chetan Bhardwaj"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=25"
-                />
+                <UserCard id="1" name="Naina Upadhyay" role="Student" avatar="https://i.pravatar.cc/100?img=5" />
+                <UserCard id="2" name="Wonder Woman" role="Student" avatar="https://i.pravatar.cc/100?img=32" />
+                <UserCard id="3" name="Bill Gates" role="Student" avatar="https://i.pravatar.cc/100?img=60" />
+                <UserCard id="4" name="Devesh Kumar Singh" role="Student" avatar="https://i.pravatar.cc/100?img=15" />
+                <UserCard id="5" name="Chetan Bhardwaj" role="Student" avatar="https://i.pravatar.cc/100?img=25" />
               </div>
             </div>
           </div>
@@ -211,3 +178,4 @@ const Feed = () => {
 };
 
 export default Feed;
+
