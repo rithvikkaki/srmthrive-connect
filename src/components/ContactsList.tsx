@@ -23,6 +23,7 @@ const ContactsList = () => {
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
+  // For the sidebar, add static "Student" role under each fellow like the screenshot
   return (
     <>
       <div>
@@ -47,7 +48,10 @@ const ContactsList = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-sm">{contact.name}</span>
+              <div>
+                <span className="text-sm">{contact.name}</span>
+                <div className="text-xs text-muted-foreground leading-none">Student</div>
+              </div>
             </div>
           ))}
         </div>
