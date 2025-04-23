@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Send } from "lucide-react";
@@ -40,11 +39,10 @@ const FellowAIChatModal = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null); // ADDED
+  const [aiError, setAiError] = useState<string | null>(null);
   const { getGeminiReply, loading } = useGeminiReply();
   const chatBodyRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom of chat on new messages
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
@@ -83,14 +81,19 @@ const FellowAIChatModal = ({
     );
   };
 
-  const removePendingAiMessage = () => {
-    setMessages(msgs => msgs.filter(m => m.id !== "pending-ai"));
-  };
-
+  // Add log here to confirm function call
   const handleSend = async (customMessage?: string) => {
+    console.log("handleSend called; sending:", sending, "loading:", loading, "input:", input);
     setAiError(null); // Reset error state
     const msgToSend = typeof customMessage === "string" ? customMessage : input.trim();
-    if (!msgToSend || sending) return;
+    if (!msgToSend) {
+      console.log("Blocked: empty message");
+      return;
+    }
+    if (sending || loading) {
+      console.log("Blocked: already sending or loading");
+      return;
+    }
     const userMsg: Message = {
       id: Math.random().toString(36).slice(2),
       content: msgToSend,
@@ -110,7 +113,6 @@ const FellowAIChatModal = ({
       console.log("[Gemini] Sending to edge function:", userMsg.content);
       aiText = await getGeminiReply({ message: userMsg.content });
       console.log("[Gemini] Raw reply:", aiText);
-      // Show error on null, undefined, or error message string
       if (
         !aiText ||
         aiText.toLowerCase().startsWith("error") ||
@@ -126,11 +128,13 @@ const FellowAIChatModal = ({
         updatePendingAiMessage(aiText);
       }
     } catch (e: any) {
+      console.error("Gemini failed to reply:", e);
       setAiError("Gemini failed to reply. " + (e?.message || ""));
       updatePendingAiMessage(null, "Gemini failed to reply. " + (e?.message || ""));
     }
 
     setSending(false);
+    console.log("handleSend exiting; messages:", messages);
   };
 
   // Reset messages when switching fellow or closing
@@ -138,6 +142,13 @@ const FellowAIChatModal = ({
     if (!open) setMessages([]);
     setAiError(null);
   }, [open, fellow]);
+
+  // To diagnose Enter key, use a separate handler
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !sending && !loading) {
+      handleSend();
+    }
+  };
 
   // Update to directly call handleSend with the example question as param
   const handleExampleClick = (q: string) => {
@@ -203,7 +214,6 @@ const FellowAIChatModal = ({
               </div>
             </div>
           ))}
-          {/* Error OUTSIDE message list */}
           {aiError && (
             <div className="text-xs text-red-500 mt-2 text-center">
               {aiError}
@@ -216,8 +226,9 @@ const FellowAIChatModal = ({
             onChange={e => setInput(e.target.value)}
             className="flex-1 rounded-full px-4 py-2 border focus:outline-none text-sm"
             placeholder="Type a message"
-            onKeyDown={e => e.key === "Enter" && handleSend()}
+            onKeyDown={handleInputKeyDown}
             disabled={sending || loading}
+            aria-label="Type a message"
           />
           <button
             onClick={() => handleSend()}
@@ -234,4 +245,3 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
-
