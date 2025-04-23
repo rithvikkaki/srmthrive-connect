@@ -30,8 +30,6 @@ interface OutletProfileContext {
   role: string;
 }
 
-// Remove ProfileProps type, will use context
-
 const Profile = () => {
   const { avatarUrl: globalAvatarUrl, onAvatarChange, name, role } = useOutletContext<OutletProfileContext>();
   const { id } = useParams();
@@ -108,7 +106,7 @@ const Profile = () => {
       author: {
         id: "4",
         name: profileData.name,
-        avatar: avatarUrl
+        avatar: globalAvatarUrl
       },
       timeAgo: "just now",
       content: postText,
@@ -171,7 +169,6 @@ const Profile = () => {
   // When profile photo is updated, sync up everywhere
   const handleUpdateAvatar = () => {
     if (previewUrl && uploadedImage) {
-      setAvatarUrl(previewUrl);
       if (onAvatarChange) {
         onAvatarChange(previewUrl); // THIS propagates to Layout, which updates everywhere
       }
@@ -234,7 +231,7 @@ const Profile = () => {
           <div className="absolute -top-16 left-6 w-32 h-32 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 p-1">
             <div className="w-full h-full rounded-full overflow-hidden relative group cursor-pointer" onClick={triggerFileInput}>
               <Avatar className="w-full h-full">
-                <AvatarImage src={avatarUrl} alt={profileData.name} className="w-full h-full object-cover" />
+                <AvatarImage src={globalAvatarUrl} alt={profileData.name} className="w-full h-full object-cover" />
                 <AvatarFallback>{profileData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -505,7 +502,7 @@ const Profile = () => {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full overflow-hidden">
                 <img 
-                  src={avatarUrl} 
+                  src={globalAvatarUrl} 
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                 />
