@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, CirclePlus, CircleMinus } from "lucide-react";
 
-const DURATION_OPTIONS = [
+// Fix value types for options arrays
+const DURATION_OPTIONS: { label: string; value: number | "custom" }[] = [
   { label: "24 hours", value: 24 * 60 * 60 },
   { label: "3 days", value: 3 * 24 * 60 * 60 },
   { label: "1 week", value: 7 * 24 * 60 * 60 },
@@ -33,8 +34,9 @@ const MIN_OPTIONS = 2;
 const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, onCreate }) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
-  const [duration, setDuration] = useState<number | "custom">(DURATION_OPTIONS[0].value as number);
-  const [customDuration, setCustomDuration] = useState(1);
+  // Proper typing here:
+  const [duration, setDuration] = useState<number | "custom">(DURATION_OPTIONS[0].value);
+  const [customDuration, setCustomDuration] = useState<number>(1);
   const [visibility, setVisibility] = useState("public");
   const [type, setType] = useState("single");
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
       });
       setQuestion("");
       setOptions(["", ""]);
-      setDuration(DURATION_OPTIONS[0].value as number);
+      setDuration(DURATION_OPTIONS[0].value); // number type always
       setCustomDuration(1);
       setVisibility("public");
       setType("single");
@@ -127,7 +129,8 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
               <button
                 key={opt.value}
                 className={`px-3 py-1 rounded text-xs border ${duration === opt.value ? "bg-[#9b87f5] text-white border-[#9b87f5]" : "border-border bg-muted"}`}
-                onClick={() => setDuration(opt.value === "custom" ? "custom" : Number(opt.value))}
+                // Cast to the right type for union matches
+                onClick={() => setDuration(opt.value)}
                 disabled={loading}
                 type="button"
               >
