@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import Events from "./pages/Events";
 import Groups from "./pages/Groups";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
+import Txt2YT from "./pages/Txt2YT"; // Add this import
 
 const queryClient = new QueryClient();
 
@@ -42,6 +42,7 @@ const App = () => (
             <Route path="events" element={<Events />} />
             <Route path="groups" element={<Groups />} />
           </Route>
+          <Route path="/txt2yt" element={<Txt2YT />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
