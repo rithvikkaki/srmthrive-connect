@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { EditIcon, FileImage, BarChart2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
