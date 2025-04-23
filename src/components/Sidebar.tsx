@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Users, Layers, Calendar, FileText, Bookmark } from "lucide-react";
+import { Users, Layers, Calendar, FileText, Bookmark, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import UpdateCard from "./UpdateCard";
@@ -77,7 +77,13 @@ const Sidebar = ({ isOpen, avatarUrl, name, role }: SidebarProps) => {
                   <Bookmark className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium uppercase text-sm">Bookmarks</span>
                 </Link>
-                {/* TXT2YT removed */}
+                <Link 
+                  to="/txt2yt"
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors"
+                >
+                  <Youtube className="h-5 w-5 text-red-500" />
+                  <span className="font-medium uppercase text-sm">Txt2YT</span>
+                </Link>
               </nav>
 
               <div className="mt-6">
@@ -103,3 +109,4 @@ const Sidebar = ({ isOpen, avatarUrl, name, role }: SidebarProps) => {
 };
 
 export default Sidebar;
+
