@@ -1,11 +1,10 @@
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
-const YT_API_KEY = "AIzaSyARbuc7JlDNJ1bXrM1QcPUm5jt7lr-kqz8";
 
 interface YTVideo {
   id: { videoId: string };
@@ -34,7 +33,7 @@ export default function Txt2YT() {
   const [watchLater, setWatchLaterState] = useState<string[]>(getWatchLater());
   const navigate = useNavigate();
 
-  // Search for YouTube videos
+  // Search for YouTube videos using backend
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
@@ -43,7 +42,11 @@ export default function Txt2YT() {
     setError("");
     setVideos([]);
     try {
-      const resp = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=16&key=${YT_API_KEY}`);
+      const resp = await fetch("https://czdxzclliafbxrxblpjt.functions.supabase.co/youtube-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
       const data = await resp.json();
       if (data.error) throw new Error(data.error.message);
       setVideos(data.items || []);
@@ -63,17 +66,12 @@ export default function Txt2YT() {
   };
 
   // Persist to localStorage
-  const setWatchLater = (list: string[]) => {
-    localStorage.setItem("yt-watch-later", JSON.stringify(list));
-  };
-
   React.useEffect(() => {
     setWatchLater(watchLater);
   }, [watchLater]);
 
   return (
     <div className="max-w-4xl mx-auto py-10">
-      {/* Back Button */}
       <button
         className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded bg-[#9b87f5] text-white hover:bg-[#7d67e5] focus:outline-none focus:ring-2 focus:ring-[#9b87f5]"
         onClick={() => navigate("/app")}
