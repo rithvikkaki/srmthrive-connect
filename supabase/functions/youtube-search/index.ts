@@ -1,3 +1,4 @@
+// Redeployed to pick up latest YOUTUBE_API_KEY secret
 
 // Improved YouTube Search Edge Function: redeployed with extra logging to ensure env loads
 
