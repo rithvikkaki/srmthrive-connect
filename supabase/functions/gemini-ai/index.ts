@@ -6,9 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Change this to the correct, supported Gemini model.
-// Use "gemini-1.5-pro-latest" which is widely available (Apr 2024).
-const GEMINI_MODEL = "gemini-1.5-pro-latest";
+// Use the most widely supported Gemini model on v1 as of Apr 2024:
+const GEMINI_MODEL = "gemini-pro"; // <-- This should work for all API keys and the REST API
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,7 +22,7 @@ serve(async (req) => {
         status: 400,
       });
     }
-    // Use the latest, supported Gemini model endpoint!
+    // Use supported model for v1
     const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
     const response = await fetch(url, {
       method: "POST",
