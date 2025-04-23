@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon } from "lucide-react";
+import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon, CheckCircle, AlertCircle, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,30 @@ interface NavbarProps {
   name: string;
   role: string;
 }
+
+const notifications = [
+  {
+    id: 1,
+    type: "success",
+    icon: <CheckCircle className="w-4 h-4 text-green-600 mr-2" />,
+    message: "Your event registration is confirmed!",
+    time: "1 min ago"
+  },
+  {
+    id: 2,
+    type: "warning",
+    icon: <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />,
+    message: "Assignment deadline tomorrow.",
+    time: "10 min ago"
+  },
+  {
+    id: 3,
+    type: "message",
+    icon: <MessageSquare className="w-4 h-4 text-thrive-500 mr-2" />,
+    message: "You received a new message from Aman.",
+    time: "20 min ago"
+  },
+];
 
 const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarProps) => {
   return (
@@ -73,9 +97,15 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
               <DropdownMenuContent align="end" className="z-[99] w-80">
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>
-                  No notifications yet
-                </DropdownMenuItem>
+                {notifications.map((notif) => (
+                  <DropdownMenuItem key={notif.id} className="flex items-start space-x-2">
+                    <span className="pt-0.5">{notif.icon}</span>
+                    <span>
+                      <span className="block text-sm">{notif.message}</span>
+                      <span className="block text-xs text-muted-foreground">{notif.time}</span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
             <Link to="/app/profile/me">
