@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
-import { Textarea } from "@/components/ui/textarea";
 import HobbyTagsInput from "@/components/HobbyTagsInput";
 
 // Use a color for edit button from the provided palette.
