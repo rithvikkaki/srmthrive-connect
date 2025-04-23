@@ -6,12 +6,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Always reply with the canned demo Gemini AI reply (never call real Gemini API)
+// Always reply with the WhatsApp Gemini AI demo reply that echoes the user message and mentions the contact name.
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-  // Always return demo reply, no matter what
+  let contactName = "your contact";
+  let message = "";
+  try {
+    const body = await req.json();
+    message = typeof body.message === "string" ? body.message : "";
+    if (typeof body.contactName === "string" && body.contactName.trim() !== "") {
+      contactName = body.contactName.trim();
+    }
+  } catch (_) {
+    // Fail gracefully: Use the defaults if parsing fails
+  }
+  const replyText = `Hello from WhatsApp Gemini! You said to ${contactName}: "${message}"`;
+
   return new Response(
     JSON.stringify({
       candidates: [
@@ -19,7 +31,7 @@ serve(async (req) => {
           content: {
             parts: [
               {
-                text: "Hello, this is a demo Gemini AI reply! (The real Gemini API isn't available. If you'd like to see real AI responses, set up your Google AI Studio API key and check your Gemini API access.)"
+                text: replyText
               }
             ]
           }
