@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +30,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Dummy profile data -- replace with real user info as needed
+const dummyProfile = {
+  avatarUrl: "https://i.pravatar.cc/100?img=5",
+  name: "Naina Upadhyay",
+  role: "Student",
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -51,7 +57,17 @@ const App = () => (
             }
           >
             <Route index element={<Feed />} />
-            <Route path="profile/:id" element={<Profile />} />
+            <Route
+              path="profile/:id"
+              element={
+                <Profile
+                  avatarUrl={dummyProfile.avatarUrl}
+                  onAvatarChange={() => {}}
+                  name={dummyProfile.name}
+                  role={dummyProfile.role}
+                />
+              }
+            />
             <Route path="blogs" element={<Blogs />} />
             <Route path="notices" element={<Notices />} />
             <Route path="bookmarks" element={<Bookmarks />} />
