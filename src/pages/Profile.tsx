@@ -1,40 +1,66 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X, Check, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
 import { Textarea } from "@/components/ui/textarea";
+import HobbyTagsInput from "@/components/HobbyTagsInput";
 
 // Use a color for edit button from the provided palette.
 const EDIT_BUTTON_COLOR = "#9b87f5";
 
+const PROGRAMS = [
+  "B.Tech CSE", "B.Tech ECE", "MBA", "M.Tech", "BBA", "B.Sc", "BA", "B.Com"
+];
+const ROLES = ["Student", "Teacher", "Researcher"];
+const PREDEFINED_INTERESTS = [
+  "AI", "Web Dev", "Blockchain", "FinTech", "IoT", "Music", "ML", "Writing", "Football", "Guitar"
+];
+
 const Profile = () => {
+  // ... keep existing code up to state initialization ...
   const { id } = useParams();
+
+  // ----- NEW: Add additional profile fields and "About Me" -----
+  // auto-generate join date if empty
+  const getDefaultJoinDate = () => {
+    const today = new Date();
+    return today.toISOString().slice(0,10);
+  };
+
   const [postText, setPostText] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("https://i.pravatar.cc/100?img=12");
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // for photo
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // UPDATED PROFILE DATA SHAPE
   const [profileData, setProfileData] = useState({
     name: "Rithvik Kaki",
     bio: "Student | MERN Stack",
     department: "CS",
     university: "SRM University",
     year: "4",
-    joined: "2021-09-05",
-    course: "BTech Computer Science",
-    role: "Student", // Student/Teacher/Researcher
-    hobbies: "Guitar, Football",
-    interests: "AI, Web Dev",
-    achievements: "Won Coding Hackathon 2024"
+    joined: getDefaultJoinDate(),
+    course: "B.Tech Computer Science",
+    program: "B.Tech CSE",
+    role: "Student",
+    hobbies: ["Guitar", "Football"],
+    interests: ["AI", "Web Dev"],
+    achievements: "Won Coding Hackathon 2024",
+    aboutMe: "I love computers and building things!"
   });
   const [editProfileData, setEditProfileData] = useState({...profileData});
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -90,33 +116,51 @@ const Profile = () => {
     });
   };
 
-  // Fix avatar update logic: setAvatarUrl from preview, reset previewUrl+file & input value
+  // -------- PROFILE PHOTO UPLOAD FIX --------
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
+      setUploadError(null);
       if (!file.type.startsWith("image/")) {
+        setUploadError("Please select an image file");
         toast({
           variant: "destructive",
           title: "Invalid file type",
-          description: "Please upload an image file (JPG, PNG, etc.)",
+          description: "Please upload an image file.",
         });
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
+        setUploadError("File too large (max 5MB)");
         toast({
           variant: "destructive",
           title: "File too large",
-          description: "Please upload an image smaller than 5MB",
+          description: "Upload an image smaller than 5MB.",
         });
         return;
       }
       setUploadedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       setDialogOpen(true);
+      setUploadProgress(10);
+
+      // Simulate progress
+      let progress = 10;
+      const interval = setInterval(() => {
+        progress += 25 + Math.random() * 15;
+        if (progress >= 100) {
+          progress = 100;
+          setUploadProgress(progress);
+          clearInterval(interval);
+        } else {
+          setUploadProgress(progress);
+        }
+      }, 150);
     }
   };
 
+  // Save action: "instant" for now, but you can plug an actual upload here
   const handleUpdateAvatar = () => {
     if (previewUrl && uploadedImage) {
       setAvatarUrl(previewUrl);
@@ -127,6 +171,8 @@ const Profile = () => {
       setDialogOpen(false);
       setUploadedImage(null);
       setPreviewUrl(null);
+      setUploadProgress(0);
+      setUploadError(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -140,12 +186,15 @@ const Profile = () => {
   const cancelUpload = () => {
     setUploadedImage(null);
     setPreviewUrl(null);
+    setUploadProgress(0);
+    setUploadError(null);
     setDialogOpen(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
+  // ------- Profile Edit Logic with expanded fields -------
   const handleEditProfile = () => {
     setEditProfileData({...profileData});
     setIsEditing(true);
@@ -165,6 +214,7 @@ const Profile = () => {
     setIsEditing(false);
   };
 
+  // ... rest of the code stays the same, render, etc. ...
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-black/90 rounded-lg overflow-hidden">
@@ -227,6 +277,7 @@ const Profile = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-6">
           <div className="bg-card rounded-md shadow-sm border border-border p-4">
+            {/* Expanded Profile Info */}
             {!isEditing ? (
               <div className="space-y-4">
                 <div>
@@ -242,11 +293,16 @@ const Profile = () => {
                   </div>
                   <div className="mt-4 space-y-2">
                     <div><span className="font-medium">Joined:</span> {profileData.joined}</div>
+                    <div><span className="font-medium">Program:</span> {profileData.program}</div>
                     <div><span className="font-medium">Course:</span> {profileData.course}</div>
                     <div><span className="font-medium">Role:</span> {profileData.role}</div>
-                    <div><span className="font-medium">Hobbies:</span> {profileData.hobbies}</div>
-                    <div><span className="font-medium">Interests:</span> {profileData.interests}</div>
-                    <div><span className="font-medium">Achievements:</span> {profileData.achievements}</div>
+                    <div><span className="font-medium">Hobbies:</span> {profileData.hobbies.join(", ")}</div>
+                    <div><span className="font-medium">Interests:</span> {profileData.interests.join(", ")}</div>
+                    <div><span className="font-medium">Achievements:</span> <span dangerouslySetInnerHTML={{__html: profileData.achievements}} /></div>
+                    <div>
+                      <span className="font-medium">About Me:</span> 
+                      <div className="text-sm">{profileData.aboutMe}</div>
+                    </div>
                   </div>
                 </div>
                 
@@ -270,77 +326,130 @@ const Profile = () => {
                       <label className="text-sm text-muted-foreground">Name</label>
                       <Input 
                         value={editProfileData.name} 
-                        onChange={(e) => setEditProfileData({...editProfileData, name: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, name: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Bio</label>
                       <Input 
                         value={editProfileData.bio} 
-                        onChange={(e) => setEditProfileData({...editProfileData, bio: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, bio: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Department</label>
                       <Input 
                         value={editProfileData.department} 
-                        onChange={(e) => setEditProfileData({...editProfileData, department: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, department: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">University</label>
                       <Input 
                         value={editProfileData.university} 
-                        onChange={(e) => setEditProfileData({...editProfileData, university: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, university: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Year</label>
                       <Input 
                         value={editProfileData.year} 
-                        onChange={(e) => setEditProfileData({...editProfileData, year: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, year: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Joined</label>
                       <Input 
                         value={editProfileData.joined} 
-                        onChange={(e) => setEditProfileData({...editProfileData, joined: e.target.value})}
+                        readOnly
                       />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Program</label>
+                      <select
+                        className="w-full border rounded px-2 py-2 focus:outline-none"
+                        value={editProfileData.program}
+                        onChange={e => setEditProfileData({...editProfileData, program: e.target.value})}
+                      >
+                        {PROGRAMS.map(option => (
+                          <option key={option}>{option}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Course</label>
                       <Input 
                         value={editProfileData.course} 
-                        onChange={(e) => setEditProfileData({...editProfileData, course: e.target.value})}
+                        onChange={e => setEditProfileData({...editProfileData, course: e.target.value})}
                       />
                     </div>
                     <div>
                       <label className="text-sm text-muted-foreground">Role</label>
-                      <Input 
-                        value={editProfileData.role} 
-                        onChange={(e) => setEditProfileData({...editProfileData, role: e.target.value})}
+                      <select
+                        className="w-full border rounded px-2 py-2 focus:outline-none"
+                        value={editProfileData.role}
+                        onChange={e => setEditProfileData({...editProfileData, role: e.target.value})}
+                      >
+                        {ROLES.map(option => (
+                          <option key={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1">Hobbies</label>
+                      <HobbyTagsInput
+                        value={editProfileData.hobbies}
+                        onChange={(newTags) => setEditProfileData({...editProfileData, hobbies: newTags})}
+                        placeholder="Add a hobby..."
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground">Hobbies</label>
-                      <Input 
-                        value={editProfileData.hobbies} 
-                        onChange={(e) => setEditProfileData({...editProfileData, hobbies: e.target.value})}
+                      <label className="text-sm text-muted-foreground mb-1">Interests</label>
+                      <HobbyTagsInput
+                        value={editProfileData.interests}
+                        onChange={newTags => setEditProfileData({...editProfileData, interests: newTags})}
+                        placeholder="Add an interest..."
+                      />
+                      {/* Optionally: Quick pick */}
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {PREDEFINED_INTERESTS.map(opt => (
+                          <button
+                            type="button"
+                            key={opt}
+                            onClick={() =>
+                              !editProfileData.interests.includes(opt) &&
+                              setEditProfileData({
+                                ...editProfileData,
+                                interests: [...editProfileData.interests, opt]
+                              })
+                            }
+                            className={`px-2 py-0.5 rounded text-xs
+                              ${editProfileData.interests.includes(opt)
+                                ? "bg-[#9b87f5] text-white"
+                                : "bg-muted text-gray-700 hover:bg-gray-300"}
+                            `}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-1">Achievements (rich text allowed)</label>
+                      <Textarea
+                        value={editProfileData.achievements}
+                        onChange={e => setEditProfileData({...editProfileData, achievements: e.target.value})}
+                        placeholder="Type or paste HTML here for rich formatting."
+                        rows={3}
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground">Interests</label>
-                      <Input 
-                        value={editProfileData.interests} 
-                        onChange={(e) => setEditProfileData({...editProfileData, interests: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Achievements</label>
-                      <Input 
-                        value={editProfileData.achievements} 
-                        onChange={(e) => setEditProfileData({...editProfileData, achievements: e.target.value})}
+                      <label className="text-sm text-muted-foreground mb-1">About Me</label>
+                      <Textarea
+                        value={editProfileData.aboutMe}
+                        onChange={e => setEditProfileData({...editProfileData, aboutMe: e.target.value})}
+                        placeholder="Tell us about yourself!"
+                        rows={3}
                       />
                     </div>
                   </div>
@@ -542,10 +651,23 @@ const Profile = () => {
                 </button>
               </div>
             )}
-            
+            {uploadError && <div className="text-red-500 text-sm mb-2">{uploadError}</div>}
+            {uploadProgress > 0 && (
+              <div className="w-full mb-2">
+                <div className="h-2 bg-muted rounded">
+                  <div className="bg-[#9b87f5] h-2 rounded" style={{width: `${uploadProgress}%`}}></div>
+                </div>
+                <div className="text-xs text-muted-foreground text-right">{uploadProgress}%</div>
+              </div>
+            )}
             <div className="flex gap-2 mt-4">
               <Button variant="outline" onClick={cancelUpload}>Cancel</Button>
-              <Button onClick={handleUpdateAvatar}>Save New Photo</Button>
+              <Button
+                onClick={handleUpdateAvatar}
+                disabled={uploadProgress < 100}
+              >
+                Save New Photo
+              </Button>
             </div>
           </div>
         </DialogContent>
