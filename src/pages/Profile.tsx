@@ -16,6 +16,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthUser } from "@/hooks/useAuthUser";
 
+import Sidebar from "@/components/profile/Sidebar";
+import PostsSection from "@/components/profile/PostsSection";
+
 const EDIT_BUTTON_COLOR = "#9b87f5";
 
 const PROGRAMS = [
@@ -444,370 +447,33 @@ const Profile = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-6">
-          <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            {!isEditing ? (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm uppercase text-muted-foreground mb-1">STUDENT</h3>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{profileData.department}</p>
-                      <p className="text-sm text-muted-foreground">{profileData.university}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">Year {profileData.year}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    <div><span className="font-medium">Joined:</span> {profileData.joined}</div>
-                    <div><span className="font-medium">Program:</span> {profileData.program}</div>
-                    <div><span className="font-medium">Course:</span> {profileData.course}</div>
-                    <div><span className="font-medium">Role:</span> {profileData.role}</div>
-                    <div><span className="font-medium">Hobbies:</span> {profileData.hobbies.join(", ")}</div>
-                    <div><span className="font-medium">Interests:</span> {profileData.interests.join(", ")}</div>
-                    <div><span className="font-medium">Achievements:</span> <span dangerouslySetInnerHTML={{ __html: profileData.achievements }} /></div>
-                    <div>
-                      <span className="font-medium">About Me:</span>
-                      <div className="text-sm">{profileData.aboutMe}</div>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-white border-0"
-                  style={{ background: EDIT_BUTTON_COLOR }}
-                  onClick={handleEditProfile}
-                >
-                  <Pencil className="h-4 w-4 mr-1" />
-                  EDIT
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm uppercase text-muted-foreground mb-1">EDIT PROFILE</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm text-muted-foreground">Name</label>
-                      <Input
-                        value={editProfileData.name}
-                        onChange={e => setEditProfileData({ ...editProfileData, name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Bio</label>
-                      <Input
-                        value={editProfileData.bio}
-                        onChange={e => setEditProfileData({ ...editProfileData, bio: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Department</label>
-                      <Input
-                        value={editProfileData.department}
-                        onChange={e => setEditProfileData({ ...editProfileData, department: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">University</label>
-                      <Input
-                        value={editProfileData.university}
-                        onChange={e => setEditProfileData({ ...editProfileData, university: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Year</label>
-                      <Input
-                        value={editProfileData.year}
-                        onChange={e => setEditProfileData({ ...editProfileData, year: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Joined</label>
-                      <Input
-                        value={editProfileData.joined}
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Program</label>
-                      <select
-                        className="w-full border rounded px-2 py-2 focus:outline-none"
-                        value={editProfileData.program}
-                        onChange={e => setEditProfileData({ ...editProfileData, program: e.target.value })}
-                      >
-                        {PROGRAMS.map(option => (
-                          <option key={option}>{option}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Course</label>
-                      <Input
-                        value={editProfileData.course}
-                        onChange={e => setEditProfileData({ ...editProfileData, course: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Role</label>
-                      <select
-                        className="w-full border rounded px-2 py-2 focus:outline-none"
-                        value={editProfileData.role}
-                        onChange={e => setEditProfileData({ ...editProfileData, role: e.target.value })}
-                      >
-                        {ROLES.map(option => (
-                          <option key={option}>{option}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground mb-1">Hobbies</label>
-                      <HobbyTagsInput
-                        value={editProfileData.hobbies}
-                        onChange={(newTags) => setEditProfileData({ ...editProfileData, hobbies: newTags })}
-                        placeholder="Add a hobby..."
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground mb-1">Interests</label>
-                      <HobbyTagsInput
-                        value={editProfileData.interests}
-                        onChange={newTags => setEditProfileData({ ...editProfileData, interests: newTags })}
-                        placeholder="Add an interest..."
-                      />
-                      <div className="mt-1 flex flex-wrap gap-2">
-                        {PREDEFINED_INTERESTS.map(opt => (
-                          <button
-                            type="button"
-                            key={opt}
-                            onClick={() =>
-                              !editProfileData.interests.includes(opt) &&
-                              setEditProfileData({
-                                ...editProfileData,
-                                interests: [...editProfileData.interests, opt]
-                              })
-                            }
-                            className={`px-2 py-0.5 rounded text-xs
-                              ${editProfileData.interests.includes(opt)
-                                ? "bg-[#9b87f5] text-white"
-                                : "bg-muted text-gray-700 hover:bg-gray-300"}
-                            `}
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground mb-1">Achievements (rich text allowed)</label>
-                      <Textarea
-                        value={editProfileData.achievements}
-                        onChange={e => setEditProfileData({ ...editProfileData, achievements: e.target.value })}
-                        placeholder="Type or paste HTML here for rich formatting."
-                        rows={3}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground mb-1">About Me</label>
-                      <Textarea
-                        value={editProfileData.aboutMe}
-                        onChange={e => setEditProfileData({ ...editProfileData, aboutMe: e.target.value })}
-                        placeholder="Tell us about yourself!"
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-destructive"
-                    onClick={cancelEditProfile}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    CANCEL
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-thrive-500 hover:bg-thrive-600"
-                    onClick={saveProfileChanges}
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    SAVE
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            <div className="flex flex-col items-center">
-              <Calendar className="h-8 w-8 text-muted-foreground mb-2" />
-              <h3 className="font-medium">Joined on</h3>
-              <p className="text-muted-foreground">{profileData.joined}</p>
-            </div>
-          </div>
-        </div>
+        <Sidebar
+          profileData={profileData}
+          isEditing={isEditing}
+          handleEditProfile={handleEditProfile}
+          cancelEditProfile={cancelEditProfile}
+          saveProfileChanges={saveProfileChanges}
+          editProfileData={editProfileData}
+          setEditProfileData={setEditProfileData}
+          EDIT_BUTTON_COLOR={EDIT_BUTTON_COLOR}
+          PROGRAMS={PROGRAMS}
+          ROLES={ROLES}
+          PREDEFINED_INTERESTS={PREDEFINED_INTERESTS}
+          HobbyTagsInput={HobbyTagsInput}
+          Textarea={Textarea}
+        />
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                <img
-                  src={profileData.avatarUrl}
-                  alt={profileData.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <Input
-                placeholder={`WHAT'S ON YOUR MIND? ${profileData.name.toUpperCase()}`}
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                className="flex-1"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 flex-1"
-                onClick={handleSubmitPost}
-              >
-                <EditIcon className="h-4 w-4" />
-                <span>CREATE POST</span>
-              </Button>
-              <Link to="/app/blogs" className="flex-1">
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 w-full"
-                >
-                  <Pencil className="h-4 w-4" />
-                  <span>WRITE BLOG</span>
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 flex-1"
-                onClick={() => setShowAdModal(true)}
-              >
-                <FileImage className="h-4 w-4" />
-                <span>POST AD</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 flex-1"
-                onClick={() => setShowPollModal(true)}
-              >
-                <BarChart2 className="h-4 w-4" />
-                <span>POLL</span>
-              </Button>
-            </div>
-          </div>
-          <Tabs defaultValue="posts">
-            <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0">
-              <TabsTrigger
-                value="posts"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
-              >
-                POSTS
-              </TabsTrigger>
-              <TabsTrigger
-                value="blogs"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
-              >
-                BLOGS
-              </TabsTrigger>
-              <TabsTrigger
-                value="ads"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
-              >
-                ADS
-              </TabsTrigger>
-              <TabsTrigger
-                value="polls"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
-              >
-                POLLS
-              </TabsTrigger>
-              <TabsTrigger
-                value="bookmarks"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
-              >
-                BOOKMARKS
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="posts" className="mt-6 space-y-6">
-              {posts.map((post) => (
-                <Post
-                  key={post.id}
-                  id={post.id}
-                  author={post.author}
-                  timeAgo={post.timeAgo}
-                  content={post.content}
-                  likes={post.likes}
-                  comments={post.comments}
-                />
-              ))}
-              {posts.length === 0 && (
-                <div className="py-8 text-center text-muted-foreground">
-                  No posts yet.
-                </div>
-              )}
-            </TabsContent>
-            <TabsContent value="blogs" className="mt-6 space-y-6">
-              <div className="py-8 text-center text-muted-foreground">
-                No blogs yet.
-              </div>
-            </TabsContent>
-            <TabsContent value="ads" className="mt-6 space-y-6">
-              {ads.length === 0 && (
-                <div className="py-8 text-center text-muted-foreground">
-                  No ads yet.
-                </div>
-              )}
-              {ads.map((ad) => (
-                <div key={ad.id} className="bg-muted rounded-md p-4 border border-border space-y-2 animate-fade-in">
-                  <div className="flex items-center gap-2 mb-2">
-                    <img src={ad.author.avatar} alt={ad.author.name} className="w-8 h-8 rounded-full object-cover" />
-                    <span className="font-medium">{ad.author.name}</span>
-                  </div>
-                  <div className="font-semibold text-lg">{ad.title}</div>
-                  <div className="text-muted-foreground">{ad.desc}</div>
-                  {ad.image && (
-                    <img src={ad.image} alt="Ad" className="w-full max-h-64 rounded object-contain mt-2" />
-                  )}
-                  <div className="text-xs text-muted-foreground mt-1">{ad.timeAgo}</div>
-                </div>
-              ))}
-            </TabsContent>
-            <TabsContent value="polls" className="mt-6 space-y-6">
-              {polls.length === 0 && (
-                <div className="py-8 text-center text-muted-foreground">
-                  No polls yet.
-                </div>
-              )}
-              {polls.map((poll) => (
-                <div key={poll.id} className="bg-muted rounded-md p-4 border border-border animate-fade-in">
-                  <div className="font-semibold">{poll.question}</div>
-                  <ul className="mt-2 space-y-1">
-                    {poll.options.map((opt: string, idx: number) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <span className="inline-block bg-card px-2 rounded">{opt}</span>
-                        <span className="text-xs font-mono text-muted-foreground">{poll.votes[idx] || 0} votes</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="text-xs text-muted-foreground mt-1">Type: {poll.type}, Visibility: {poll.visibility}</div>
-                </div>
-              ))}
-            </TabsContent>
-            <TabsContent value="bookmarks" className="mt-6 space-y-6">
-              <div className="py-8 text-center text-muted-foreground">
-                No bookmarks yet.
-              </div>
-            </TabsContent>
-          </Tabs>
+          <PostsSection
+            postText={postText}
+            setPostText={setPostText}
+            handleSubmitPost={handleSubmitPost}
+            profileData={profileData}
+            posts={posts}
+            ads={ads}
+            setShowAdModal={setShowAdModal}
+            polls={polls}
+            setShowPollModal={setShowPollModal}
+          />
         </div>
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -824,4 +490,57 @@ const Profile = () => {
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="w-32 h-32 rounded-full object-cover border-2 border-
+                  className="w-32 h-32 rounded-full object-cover border-2 border-muted"
+                />
+              </div>
+            )}
+            <div className="w-full flex flex-col gap-2">
+              <Button
+                className="w-full bg-thrive-500 hover:bg-thrive-600"
+                onClick={handleUpdateAvatar}
+                disabled={uploadProgress < 100}
+              >
+                Save Photo
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={cancelUpload}
+              >
+                Cancel
+              </Button>
+              {uploadError && <div className="text-red-500 mt-2">{uploadError}</div>}
+              {uploadProgress > 0 && (
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div className="bg-thrive-500 h-2 rounded-full transition-all duration-200"
+                    style={{ width: `${uploadProgress}%` }} />
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {showAdModal && (
+        <AdCreateModal
+          open={showAdModal}
+          onOpenChange={setShowAdModal}
+          onCreate={handleCreateAd}
+          user={{
+            id: profileUserId,
+            name: profileData.name,
+            avatar: profileData.avatarUrl,
+          }}
+        />
+      )}
+      {showPollModal && (
+        <PollCreateModal
+          open={showPollModal}
+          onOpenChange={setShowPollModal}
+          onCreate={handleCreatePoll}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Profile;
