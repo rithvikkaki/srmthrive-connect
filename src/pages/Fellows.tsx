@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Users } from "lucide-react";
 import UserCard from "@/components/UserCard";
-import MessageModal from "@/components/MessageModal";
+import FellowAIChatModal from "@/components/FellowAIChatModal";
 
 const Fellows = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,7 +69,7 @@ const Fellows = () => {
   ];
 
   const [messageModalOpen, setMessageModalOpen] = useState(false);
-  const [selectedFellow, setSelectedFellow] = useState<{name: string} | null>(null);
+  const [selectedFellow, setSelectedFellow] = useState<{id: string; name: string; avatar: string} | null>(null);
 
   const filteredFellows = searchQuery 
     ? fellows.filter(fellow => 
@@ -84,8 +83,10 @@ const Fellows = () => {
     return filteredFellows.filter(fellow => fellow.department === department);
   };
 
-  // Helper for rendering user actions (Message only)
-  const FellowActions = ({fellow}: {fellow: {name: string}}) => (
+  const GEMINI_API_KEY = "AIzaSyCB8sOnsaBqQgxENcJNGNZGrsoH4I5meYU";
+
+  // Helper for rendering user actions with new WhatsApp-style chat
+  const FellowActions = ({fellow}: {fellow: {id: string; name: string; avatar: string}}) => (
     <div className="flex space-x-2 mt-2">
       <button
         onClick={() => { setSelectedFellow(fellow); setMessageModalOpen(true); }}
@@ -249,12 +250,13 @@ const Fellows = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Message Modal */}
+      {/* Message Modal replaced with AI Chat */}
       {selectedFellow && (
-        <MessageModal
+        <FellowAIChatModal
           open={messageModalOpen}
-          onClose={() => { setMessageModalOpen(false); setSelectedFellow(null); }}
-          fellowName={selectedFellow.name}
+          onOpenChange={(open) => { setMessageModalOpen(open); if (!open) setSelectedFellow(null); }}
+          fellow={selectedFellow as any}
+          geminiApiKey={GEMINI_API_KEY}
         />
       )}
     </div>
@@ -262,4 +264,3 @@ const Fellows = () => {
 };
 
 export default Fellows;
-
