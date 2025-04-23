@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,11 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -17,21 +22,77 @@ const Login = () => {
     e.preventDefault();
 
     // Supabase Auth login
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
+    if (error || !data.session || !data.user) {
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        description: error?.message || "Invalid email or password. Please try again.",
       });
       return;
     }
 
-    // Supabase event will handle redirect via auth state in Root/App
+    // Check if profile exists, if not prompt for full name.
+    const userId = data.user.id;
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (profileError) {
+      toast({
+        variant: "destructive",
+        title: "Profile error",
+        description: profileError.message,
+      });
+      return;
+    }
+
+    if (!profile) {
+      // Prompt user to provide name
+      setPendingUserId(userId);
+      setShowNamePrompt(true);
+    } else {
+      // Profile exists—go to app
+      navigate("/app");
+    }
+  };
+
+  // Save new profile with entered name
+  const handleNameSubmit = async () => {
+    if (!fullName.trim() || !pendingUserId) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          id: pendingUserId,
+          full_name: fullName.trim(),
+          joined: new Date().toISOString().slice(0, 10),
+        },
+      ]);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to save profile",
+        description: error.message,
+      });
+      return;
+    }
+    setShowNamePrompt(false);
+    setFullName("");
+    setPendingUserId(null);
+    toast({
+      title: "Welcome!",
+      description: "Your profile was created.",
+    });
     navigate("/app");
   };
 
@@ -132,8 +193,34 @@ const Login = () => {
           </form>
         </div>
       </div>
+      <Dialog open={showNamePrompt} onOpenChange={() => setShowNamePrompt(false)}>
+        <DialogContent className="max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle>Welcome!</DialogTitle>
+            <DialogDescription>
+              Please enter your full name to complete your profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Full Name"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              autoFocus
+            />
+            <Button
+              onClick={handleNameSubmit}
+              disabled={!fullName.trim()}
+              className="w-full bg-thrive-500 hover:bg-thrive-600"
+            >
+              Save Name &amp; Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default Login;
+

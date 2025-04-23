@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
 import { EditIcon, Pencil, FileImage, BarChart2, Calendar, BookOpen, Settings, Upload, X, Check, LogOut } from "lucide-react";
@@ -38,7 +37,7 @@ interface OutletProfileContext {
 // Util: map DB profile row to local state
 function mapProfileFromDb(db: any) {
   return {
-    name: db.full_name || "Rithvik Kaki",
+    name: db.full_name || db.email || "",
     bio: db.bio || "",
     department: db.department || "",
     university: db.university || "",
@@ -825,51 +824,4 @@ const Profile = () => {
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="w-32 h-32 rounded-full object-cover border-2 border-muted"
-                />
-                <button
-                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1"
-                  onClick={cancelUpload}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            {uploadError && <div className="text-red-500 text-sm mb-2">{uploadError}</div>}
-            {uploadProgress > 0 && (
-              <div className="w-full mb-2">
-                <div className="h-2 bg-muted rounded">
-                  <div className="bg-[#9b87f5] h-2 rounded" style={{ width: `${uploadProgress}%` }}></div>
-                </div>
-                <div className="text-xs text-muted-foreground text-right">{uploadProgress}%</div>
-              </div>
-            )}
-            <div className="flex gap-2 mt-4">
-              <Button variant="outline" onClick={cancelUpload}>Cancel</Button>
-              <Button
-                onClick={handleUpdateAvatar}
-                disabled={uploadProgress < 100}
-              >
-                Save New Photo
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <AdCreateModal
-        open={showAdModal}
-        onOpenChange={setShowAdModal}
-        onCreate={handleCreateAd}
-        username={profileData.name}
-        avatarUrl={profileData.avatarUrl}
-      />
-      <PollCreateModal
-        open={showPollModal}
-        onOpenChange={setShowPollModal}
-        onCreate={handleCreatePoll}
-      />
-    </div>
-  );
-};
-
-export default Profile;
+                  className="w-32 h-32 rounded-full object-cover border-2 border-
