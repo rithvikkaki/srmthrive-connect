@@ -1,252 +1,172 @@
-import { useState } from "react";
-import { EditIcon, Pencil, FileImage, BarChart2, MoreHorizontal, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { EditIcon, Pencil, BarChart2, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import Post from "@/components/Post";
-import PollCard from "@/components/PollCard";
-import UserCard from "@/components/UserCard";
-import BlogForm from "@/components/BlogForm";
+import PostCreateModal from "@/components/PostCreateModal";
+import PollCreateModal from "@/components/PollCreateModal";
+import AdCreateModal from "@/components/AdCreateModal";
+
+// Placeholder BlogCard, AdCard, PollCard (use your existing PollCard if available)
+const BlogCard = ({ post }: any) => (
+  <div className="bg-card rounded-md border border-border p-4 mb-4">
+    <div className="flex items-center gap-2 mb-2">
+      <img src={post.author.avatar} alt={post.author.name} className="w-8 h-8 rounded-full" />
+      <div>
+        <div className="font-medium">{post.author.name}</div>
+        <div className="text-xs text-muted-foreground">{post.timeAgo}</div>
+      </div>
+    </div>
+    <div className="whitespace-pre-line">{post.content}</div>
+    {post.image && (
+      <img
+        src={post.image}
+        alt="Blog"
+        className="rounded mt-2 max-h-56 object-contain border"
+      />
+    )}
+  </div>
+);
+
+const AdCard = ({ ad }: any) => (
+  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+    <div className="flex items-center gap-2 mb-1">
+      <img src={ad.author.avatar} alt={ad.author.name} className="w-7 h-7 rounded-full" />
+      <div>
+        <span className="font-medium">{ad.author.name} • </span>
+        <span className="text-xs text-muted-foreground">{ad.timeAgo}</span>
+      </div>
+    </div>
+    <div className="font-bold mb-1">{ad.title}</div>
+    <div className="text-sm mb-1">{ad.desc}</div>
+    {ad.image && (
+      <img src={ad.image} alt="Ad" className="rounded mt-2 max-h-40 object-contain border" />
+    )}
+  </div>
+);
+
+import PollCard from "@/components/PollCard"; // Use the real one
 
 const Blogs = () => {
-  const [postText, setPostText] = useState("");
-  const [showBlogForm, setShowBlogForm] = useState(false);
-  const [blogs, setBlogs] = useState([
+  // Demo user info
+  const username = "Rithvik Kaki";
+  const avatarUrl = "https://i.pravatar.cc/100?img=12";
+
+  const [posts, setPosts] = useState<any[]>([
     {
-      id: "4",
-      author: {
-        id: "4",
-        name: "Rithvik Kaki",
-        avatar: "https://i.pravatar.cc/100?img=12"
-      },
-      timeAgo: "a minute ago",
-      content: "What is blog? A blog (a shortened version of 'weblog') is an online journal or informational website displaying information in reverse chronological order, with the latest posts appearing first, at the top. It is a platform where a writer or a group of writers share their views on an individual subject.",
-      image: "/lovable-uploads/0fed3929-0d14-470a-ad7b-e302d12eaecd.png",
-      likes: 1,
-      comments: 0
-    }
+      id: "blog-1",
+      author: { id: "4", name: username, avatar: avatarUrl },
+      timeAgo: "1 minute ago",
+      content: "What is blog? A blog (a shortened version of 'weblog') is an online journal or informational website...",
+      image: undefined,
+      type: "blog",
+    },
   ]);
-
-  const [blogToDelete, setBlogToDelete] = useState<string | null>(null);
-
+  const [ads, setAds] = useState<any[]>([]);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmitPost = () => {
-    if (!postText.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Post content cannot be empty",
-      });
-      return;
-    }
+  const [postText, setPostText] = useState("");
 
-    // Create a new post
-    toast({
-      title: "Post created",
-      description: "Your post has been successfully published",
-    });
-    setPostText("");
+  // For new blog post
+  const handleCreatePost = (post: any) => setPosts([post, ...posts]);
+  // For posting an ad
+  const handleCreateAd = (ad: any) => {
+    setAds([ad, ...ads]);
+    toast({ title: "Ad posted", description: "Your ad is now live." });
   };
-
-  const handleBlogSubmit = (title: string, content: string, image: File | null) => {
-    // Create a new blog post
-    const newBlog = {
-      id: `blog-${Date.now()}`,
-      author: {
-        id: "4",
-        name: "Rithvik Kaki",
-        avatar: "https://i.pravatar.cc/100?img=12"
-      },
-      timeAgo: "just now",
-      content: `${title}\n\n${content}`,
-      likes: 0,
-      comments: 0,
-      image: image ? URL.createObjectURL(image) : undefined
-    };
-
-    setBlogs([newBlog, ...blogs]);
-    setShowBlogForm(false);
-    toast({
-      title: "Blog published",
-      description: "Your blog post has been successfully published",
-    });
-  };
-
-  const handleDeleteBlog = (blogId: string) => {
-    setBlogs(current => current.filter(blog => blog.id !== blogId));
-    toast({
-      title: "Blog deleted",
-      description: "Your blog post has been deleted",
-      variant: "destructive",
-    });
-    setBlogToDelete(null);
-  };
+  // For polls
+  const handleCreatePoll = (poll: any) => setPolls([poll, ...polls]);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                <img 
-                  src="https://i.pravatar.cc/100?img=12" 
-                  alt="Rithvik Kaki"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <Input
-                placeholder="WHAT'S ON YOUR MIND? RITHVIK KAKI"
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                className="flex-1"
-              />
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={handleSubmitPost}
-              >
-                <EditIcon className="h-4 w-4" />
-                <span>CREATE POST</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => setShowBlogForm(true)}
-              >
-                <Pencil className="h-4 w-4" />
-                <span>WRITE BLOG</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "Post Ad feature is under development",
-                  });
-                }}
-              >
-                <FileImage className="h-4 w-4" />
-                <span>POST AD</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "Poll feature is under development",
-                  });
-                }}
-              >
-                <BarChart2 className="h-4 w-4" />
-                <span>POLL</span>
-              </Button>
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            {blogs.map(blog => (
-              <div className="relative" key={blog.id}>
-                <Post 
-                  id={blog.id}
-                  author={blog.author}
-                  timeAgo={blog.timeAgo}
-                  content={blog.content}
-                  image={blog.image}
-                  likes={blog.likes}
-                  comments={blog.comments}
-                />
-                {/* Blog menu for deleting (three dots) */}
-                <div className="absolute top-2 right-2 z-10">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setBlogToDelete(blog.id)}>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                  {blogToDelete === blog.id && (
-                    <div className="absolute right-10 top-2 bg-white border shadow-md rounded-lg p-2">
-                      <button className="flex items-center text-red-500 gap-2" onClick={() => handleDeleteBlog(blog.id)}>
-                        <Trash2 className="h-4 w-4" /> Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-medium mb-3">Polls</h3>
-            <PollCard 
-              id="2"
-              title="NEXT"
-              description="Movie: I will fight for those who cannot fight for themselves. 'Now I know, that only love can truly save the world."
-              options={[
-                { id: "1", text: "", votes: 62, percentage: 62 },
-                { id: "2", text: "", votes: 8, percentage: 8 },
-                { id: "3", text: "", votes: 31, percentage: 31 }
-              ]}
-            />
-          </div>
-          
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium">Contacts</h3>
-            </div>
-            <div className="bg-card rounded-md shadow-sm border border-border p-4">
-              <h4 className="font-medium mb-3">Fellows</h4>
-              <div className="space-y-3">
-                <UserCard 
-                  id="1"
-                  name="Naina Upadhyay"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=5"
-                />
-                <UserCard 
-                  id="2"
-                  name="Wonder Woman"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=32"
-                />
-                <UserCard 
-                  id="3"
-                  name="Bill Gates"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=60"
-                />
-                <UserCard 
-                  id="4"
-                  name="Devesh Kumar Singh"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=15"
-                />
-                <UserCard 
-                  id="5"
-                  name="Chetan Bhardwaj"
-                  role="Student"
-                  avatar="https://i.pravatar.cc/100?img=25"
-                />
-              </div>
-            </div>
-          </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="bg-card rounded-md p-4 border border-border mb-4">
+        <Input
+          placeholder={`WHAT'S ON YOUR MIND? ${username.toUpperCase()}`}
+          value={postText}
+          onChange={e => setPostText(e.target.value)}
+          className="mb-3"
+        />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setShowPostModal(true)}
+          >
+            <EditIcon className="h-4 w-4" />
+            CREATE POST
+          </Button>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setShowAdModal(true)}
+          >
+            <FileImage className="h-4 w-4" />
+            POST AD
+          </Button>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setShowPollModal(true)}
+          >
+            <BarChart2 className="h-4 w-4" />
+            POLL
+          </Button>
         </div>
       </div>
-      
-      {showBlogForm && (
-        <BlogForm 
-          onClose={() => setShowBlogForm(false)}
-          onSubmit={handleBlogSubmit}
-        />
-      )}
+
+      <PostCreateModal
+        open={showPostModal}
+        onOpenChange={setShowPostModal}
+        onCreate={handleCreatePost}
+        username={username}
+        avatarUrl={avatarUrl}
+      />
+      <AdCreateModal
+        open={showAdModal}
+        onOpenChange={setShowAdModal}
+        onCreate={handleCreateAd}
+        username={username}
+        avatarUrl={avatarUrl}
+      />
+      <PollCreateModal
+        open={showPollModal}
+        onOpenChange={setShowPollModal}
+        onCreate={handleCreatePoll}
+      />
+
+      {/* Feed: Show newest first, polls+ads+posts interleaved */}
+      {[...polls, ...ads, ...posts]
+        .sort((a, b) => (b.id > a.id ? 1 : -1))
+        .map(item =>
+          item.type === "ad" ? (
+            <AdCard ad={item} key={item.id} />
+          ) : item.options ? (
+            <PollCard
+              key={item.id}
+              id={item.id}
+              title={item.question}
+              description={""}
+              options={item.options.map((text: string, idx: number) => ({
+                id: String(idx),
+                text,
+                votes: item.votes[idx],
+                percentage:
+                  item.votes.reduce((a: number, b: number) => a + b, 0) === 0
+                    ? 0
+                    : Math.round(
+                        (item.votes[idx] * 100) /
+                          item.votes.reduce((a: number, b: number) => a + b, 0)
+                      ),
+              }))}
+            />
+          ) : (
+            <BlogCard post={item} key={item.id} />
+          )
+        )}
     </div>
   );
 };
