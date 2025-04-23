@@ -525,11 +525,8 @@ const Profile = () => {
           open={showAdModal}
           onOpenChange={setShowAdModal}
           onCreate={handleCreateAd}
-          user={{
-            id: profileUserId,
-            name: profileData.name,
-            avatar: profileData.avatarUrl,
-          }}
+          username={profileData.name}
+          avatarUrl={profileData.avatarUrl}
         />
       )}
       {showPollModal && (
