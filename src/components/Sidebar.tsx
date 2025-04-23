@@ -8,9 +8,12 @@ import ContactsList from "./ContactsList";
 
 interface SidebarProps {
   isOpen: boolean;
+  avatarUrl: string;
+  name: string;
+  role: string;
 }
 
-const Sidebar = ({ isOpen }: SidebarProps) => {
+const Sidebar = ({ isOpen, avatarUrl, name, role }: SidebarProps) => {
   return (
     <aside
       className={cn(
@@ -26,14 +29,14 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 flex items-center justify-center overflow-hidden">
                     <img 
-                      src="https://i.pravatar.cc/100?img=12" 
-                      alt="Profile"
+                      src={avatarUrl} 
+                      alt={name}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
-                    <h3 className="font-medium">Rithvik Kaki</h3>
-                    <p className="text-sm text-muted-foreground">Student</p>
+                    <h3 className="font-medium">{name}</h3>
+                    <p className="text-sm text-muted-foreground">{role}</p>
                   </div>
                 </div>
               </Link>
@@ -74,6 +77,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                   <Bookmark className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium uppercase text-sm">Bookmarks</span>
                 </Link>
+                {/* Move Txt2YT to Academia's position */}
                 <Link 
                   to="/txt2yt"
                   className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors"
@@ -106,3 +110,4 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
 };
 
 export default Sidebar;
+

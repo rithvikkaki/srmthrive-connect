@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 interface NavbarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  avatarUrl: string;
+  name: string;
+  role: string;
 }
 
-const Navbar = ({ sidebarOpen, setSidebarOpen }: NavbarProps) => {
+const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarProps) => {
   return (
     <header className="bg-background border-b border-border z-10">
       <div className="container mx-auto px-4 py-2">
@@ -65,8 +68,8 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }: NavbarProps) => {
             <Link to="/app/profile/me">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-thrive-300 to-thrive-600 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://i.pravatar.cc/100?img=12" 
-                  alt="Profile"
+                  src={avatarUrl} 
+                  alt={name}
                   className="w-full h-full object-cover"
                 />
               </div>

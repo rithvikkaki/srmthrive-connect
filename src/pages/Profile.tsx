@@ -22,8 +22,14 @@ const PREDEFINED_INTERESTS = [
   "AI", "Web Dev", "Blockchain", "FinTech", "IoT", "Music", "ML", "Writing", "Football", "Guitar"
 ];
 
-const Profile = () => {
-  // ... keep existing code up to state initialization ...
+interface ProfileProps {
+  avatarUrl: string;
+  onAvatarChange: (url: string) => void;
+  name: string;
+  role: string;
+}
+
+const Profile = ({ avatarUrl: globalAvatarUrl, onAvatarChange, name, role }: ProfileProps) => {
   const { id } = useParams();
 
   // ----- NEW: Add additional profile fields and "About Me" -----
@@ -34,7 +40,7 @@ const Profile = () => {
   };
 
   const [postText, setPostText] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("https://i.pravatar.cc/100?img=12");
+  const [avatarUrl, setAvatarUrl] = useState(globalAvatarUrl);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -163,6 +169,9 @@ const Profile = () => {
   const handleUpdateAvatar = () => {
     if (previewUrl && uploadedImage) {
       setAvatarUrl(previewUrl);
+      if (onAvatarChange) {
+        onAvatarChange(previewUrl);
+      }
       toast({
         title: "Profile photo updated",
         description: "Your profile photo has been successfully updated",
