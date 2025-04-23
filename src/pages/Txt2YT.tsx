@@ -48,7 +48,13 @@ export default function Txt2YT() {
         body: JSON.stringify({ query }),
       });
       const data = await resp.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) {
+        // data.error may be a string or object, handle both
+        const errorMsg = typeof data.error === "string"
+          ? data.error
+          : data.error?.message || "Failed to fetch results.";
+        throw new Error(errorMsg);
+      }
       setVideos(data.items || []);
     } catch (err: any) {
       setError(err?.message || "Failed to fetch results.");
