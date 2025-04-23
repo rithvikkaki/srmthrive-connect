@@ -24,16 +24,23 @@ const PREDEFINED_INTERESTS = [
   "AI", "Web Dev", "Blockchain", "FinTech", "IoT", "Music", "ML", "Writing", "Football", "Guitar"
 ];
 
-// Use Outlet context to get these props
+// Use Outlet context for global profile, updater, and avatar updater
 interface OutletProfileContext {
   avatarUrl: string;
   onAvatarChange: (url: string) => void;
+  onProfileChange?: (data: { name?: string; role?: string; avatarUrl?: string }) => void; // new
   name: string;
   role: string;
 }
 
 const Profile = () => {
-  const { avatarUrl: globalAvatarUrl, onAvatarChange, name, role } = useOutletContext<OutletProfileContext>();
+  const {
+    avatarUrl: globalAvatarUrl,
+    onAvatarChange,
+    onProfileChange,
+    name,
+    role,
+  } = useOutletContext<OutletProfileContext>();
   const { id } = useParams();
 
   // ----- NEW: Add additional profile fields and "About Me" -----
@@ -168,11 +175,15 @@ const Profile = () => {
     }
   };
 
-  // When profile photo is updated, sync up everywhere
+  // When profile photo is updated, sync up everywhere (also update sidebar!)
   const handleUpdateAvatar = () => {
     if (previewUrl && uploadedImage) {
       if (onAvatarChange) {
         onAvatarChange(previewUrl); // THIS propagates to Layout, which updates everywhere
+      }
+      // Also sync sidebar with latest avatar
+      if (onProfileChange) {
+        onProfileChange({ avatarUrl: previewUrl });
       }
       toast({
         title: "Profile photo updated",
@@ -202,6 +213,14 @@ const Profile = () => {
   const saveProfileChanges = () => {
     setProfileData({...editProfileData});
     setIsEditing(false);
+    // NEW: When user saves profile, sync with sidebar/layout (global)
+    if (onProfileChange) {
+      onProfileChange({
+        name: editProfileData.name,
+        role: editProfileData.role,
+        // Don't update avatar except in the avatar dialog
+      });
+    }
     toast({
       title: "Profile updated",
       description: "Your profile details have been successfully updated",

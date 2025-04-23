@@ -5,10 +5,10 @@ import Sidebar from "./Sidebar";
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Dummy profile data, but now set as reactive state
+// Initial Profile set to match Rithvik Kaki's info (matches the main profile!)
 const initialProfile = {
-  avatarUrl: "https://i.pravatar.cc/100?img=5",
-  name: "Naina Upadhyay",
+  avatarUrl: "https://i.pravatar.cc/100?img=12",      // The same avatar as in Profile
+  name: "Rithvik Kaki",
   role: "Student",
 };
 
@@ -25,6 +25,7 @@ const Layout = () => {
     }
   }, [isMobile]);
 
+  // Handler for avatar changes from Profile page via Outlet
   const handleAvatarChange = (newUrl: string) => {
     setProfile(prev => ({
       ...prev,
@@ -32,7 +33,19 @@ const Layout = () => {
     }));
   };
 
-  // If you plan to let users change name/role later, you can pass handlers for those too.
+  // Handler for profile changes from Profile page via Outlet
+  const handleProfileChange = ({
+    name,
+    role,
+    avatarUrl,
+  }: { name?: string; role?: string; avatarUrl?: string }) => {
+    setProfile(prev => ({
+      ...prev,
+      name: name !== undefined ? name : prev.name,
+      role: role !== undefined ? role : prev.role,
+      avatarUrl: avatarUrl !== undefined ? avatarUrl : prev.avatarUrl,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -51,11 +64,12 @@ const Layout = () => {
           role={profile.role}
         />
         <main className="flex-1 overflow-y-auto p-4">
-          {/* Pass the avatarUrl, name, role, and avatar change handler to Outlet (children routes) */}
+          {/* Include name, role, avatarUrl & updaters in Outlet context */}
           <Outlet
             context={{
               avatarUrl: profile.avatarUrl,
               onAvatarChange: handleAvatarChange,
+              onProfileChange: handleProfileChange,
               name: profile.name,
               role: profile.role,
             }}
