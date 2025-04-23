@@ -1,5 +1,5 @@
 
-// Improved YouTube Search Edge Function with better API key validation and error reporting
+// Improved YouTube Search Edge Function: redeployed with extra logging to ensure env loads
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
@@ -12,8 +12,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
   const YOUTUBE_API_KEY = Deno.env.get("YOUTUBE_API_KEY");
+
   if (!YOUTUBE_API_KEY) {
-    // API key missing in Supabase secrets
+    console.error("YOUTUBE_API_KEY Secret NOT found in Deno.env!");
     return new Response(
       JSON.stringify({ error: "YouTube API key not configured in server." }),
       {
@@ -22,6 +23,7 @@ serve(async (req) => {
       }
     );
   }
+
   try {
     const { query } = await req.json();
     if (!query) {
@@ -31,7 +33,9 @@ serve(async (req) => {
       });
     }
     const endpoint = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=16&key=${YOUTUBE_API_KEY}`;
+    console.log("Fetching YouTube API endpoint:", endpoint);
     const resp = await fetch(endpoint);
+
     if (!resp.ok) {
       // Try to parse Google error response
       let errJson: any = {};
@@ -46,6 +50,7 @@ serve(async (req) => {
       } else if (typeof errJson?.error === "string") {
         errorMessage = `YouTube API error: ${errJson.error}`;
       }
+      console.error("YouTube API error:", errorMessage);
       return new Response(JSON.stringify({ error: errorMessage }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 502,
@@ -56,10 +61,10 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
+    console.error("Generic error in youtube-search:", err);
     return new Response(JSON.stringify({ error: "Error contacting YouTube API" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
   }
 });
-
