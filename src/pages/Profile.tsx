@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
 import HobbyTagsInput from "@/components/HobbyTagsInput";
+import AdCreateModal from "@/components/AdCreateModal";
+import PollCreateModal from "@/components/PollCreateModal";
 
 // Use a color for edit button from the provided palette.
 const EDIT_BUTTON_COLOR = "#9b87f5";
@@ -191,17 +193,6 @@ const Profile = () => {
     }
   };
 
-  const cancelUpload = () => {
-    setUploadedImage(null);
-    setPreviewUrl(null);
-    setUploadProgress(0);
-    setUploadError(null);
-    setDialogOpen(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   // ------- Profile Edit Logic with expanded fields -------
   const handleEditProfile = () => {
     setEditProfileData({...profileData});
@@ -222,7 +213,30 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  // ... rest of the code stays the same, render, etc. ...
+  // State for Ad and Poll modals + created data
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [ads, setAds] = useState<any[]>([]);
+  const [showPollModal, setShowPollModal] = useState(false);
+  const [polls, setPolls] = useState<any[]>([]);
+
+  // Add handler for creating ads
+  const handleCreateAd = (ad: any) => {
+    setAds([ad, ...ads]);
+    toast({
+      title: "Ad created",
+      description: "Your ad has been successfully published",
+    });
+  };
+
+  // Add handler for creating polls
+  const handleCreatePoll = (poll: any) => {
+    setPolls([poll, ...polls]);
+    toast({
+      title: "Poll created",
+      description: "Your poll has been successfully published",
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-black/90 rounded-lg overflow-hidden">
@@ -514,7 +528,6 @@ const Profile = () => {
                 className="flex-1"
               />
             </div>
-            
             <div className="flex flex-wrap gap-2">
               <Button 
                 variant="outline" 
@@ -524,7 +537,6 @@ const Profile = () => {
                 <EditIcon className="h-4 w-4" />
                 <span>CREATE POST</span>
               </Button>
-              
               <Link to="/app/blogs" className="flex-1">
                 <Button 
                   variant="outline" 
@@ -534,38 +546,25 @@ const Profile = () => {
                   <span>WRITE BLOG</span>
                 </Button>
               </Link>
-              
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "This feature is under development",
-                  });
-                }}
+                onClick={() => setShowAdModal(true)}
               >
                 <FileImage className="h-4 w-4" />
                 <span>POST AD</span>
               </Button>
-              
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "Poll feature is under development",
-                  });
-                }}
+                onClick={() => setShowPollModal(true)}
               >
                 <BarChart2 className="h-4 w-4" />
                 <span>POLL</span>
               </Button>
             </div>
           </div>
-          
-          {/* Show posts */}
+          {/* Show all content types in tabs */}
           <Tabs defaultValue="posts">
             <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0">
               <TabsTrigger 
@@ -587,13 +586,18 @@ const Profile = () => {
                 ADS
               </TabsTrigger>
               <TabsTrigger 
+                value="polls" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
+              >
+                POLLS
+              </TabsTrigger>
+              <TabsTrigger 
                 value="bookmarks" 
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-thrive-500 data-[state=active]:bg-transparent"
               >
                 BOOKMARKS
               </TabsTrigger>
             </TabsList>
-            
             <TabsContent value="posts" className="mt-6 space-y-6">
               {posts.map((post) => (
                 <Post 
@@ -612,20 +616,54 @@ const Profile = () => {
                 </div>
               )}
             </TabsContent>
-            
-            <TabsContent value="blogs">
+            <TabsContent value="blogs" className="mt-6 space-y-6">
               <div className="py-8 text-center text-muted-foreground">
                 No blogs yet.
               </div>
             </TabsContent>
-            
-            <TabsContent value="ads">
-              <div className="py-8 text-center text-muted-foreground">
-                No ads yet.
-              </div>
+            <TabsContent value="ads" className="mt-6 space-y-6">
+              {ads.length === 0 && (
+                <div className="py-8 text-center text-muted-foreground">
+                  No ads yet.
+                </div>
+              )}
+              {ads.map((ad) => (
+                <div key={ad.id} className="bg-muted rounded-md p-4 border border-border space-y-2 animate-fade-in">
+                  <div className="flex items-center gap-2 mb-2">
+                    <img src={ad.author.avatar} alt={ad.author.name} className="w-8 h-8 rounded-full object-cover" />
+                    <span className="font-medium">{ad.author.name}</span>
+                  </div>
+                  <div className="font-semibold text-lg">{ad.title}</div>
+                  <div className="text-muted-foreground">{ad.desc}</div>
+                  {ad.image && (
+                    <img src={ad.image} alt="Ad" className="w-full max-h-64 rounded object-contain mt-2" />
+                  )}
+                  <div className="text-xs text-muted-foreground mt-1">{ad.timeAgo}</div>
+                </div>
+              ))}
             </TabsContent>
-            
-            <TabsContent value="bookmarks">
+            <TabsContent value="polls" className="mt-6 space-y-6">
+              {polls.length === 0 && (
+                <div className="py-8 text-center text-muted-foreground">
+                  No polls yet.
+                </div>
+              )}
+              {polls.map((poll) => (
+                <div key={poll.id} className="bg-muted rounded-md p-4 border border-border animate-fade-in">
+                  <div className="font-semibold">{poll.question}</div>
+                  <ul className="mt-2 space-y-1">
+                    {poll.options.map((opt: string, idx: number) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <span className="inline-block bg-card px-2 rounded">{opt}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{poll.votes[idx] || 0} votes</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="text-xs text-muted-foreground mt-1">Type: {poll.type}, Visibility: {poll.visibility}</div>
+                </div>
+              ))}
+            </TabsContent>
+            <TabsContent value="bookmarks" className="mt-6 space-y-6">
               <div className="py-8 text-center text-muted-foreground">
                 No bookmarks yet.
               </div>
@@ -680,6 +718,20 @@ const Profile = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Ad and Poll Modals */}
+      <AdCreateModal
+        open={showAdModal}
+        onOpenChange={setShowAdModal}
+        onCreate={handleCreateAd}
+        username={profileData.name}
+        avatarUrl={globalAvatarUrl}
+      />
+      <PollCreateModal
+        open={showPollModal}
+        onOpenChange={setShowPollModal}
+        onCreate={handleCreatePoll}
+      />
     </div>
   );
 };
