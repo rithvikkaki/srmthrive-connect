@@ -1,8 +1,9 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Youtube } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const YT_API_KEY = "AIzaSyARbuc7JlDNJ1bXrM1QcPUm5jt7lr-kqz8";
 
@@ -31,6 +32,7 @@ export default function Txt2YT() {
   const [videos, setVideos] = useState<YTVideo[]>([]);
   const [error, setError] = useState("");
   const [watchLater, setWatchLaterState] = useState<string[]>(getWatchLater());
+  const navigate = useNavigate();
 
   // Search for YouTube videos
   const handleSearch = async (e?: React.FormEvent) => {
@@ -71,6 +73,15 @@ export default function Txt2YT() {
 
   return (
     <div className="max-w-4xl mx-auto py-10">
+      {/* Back Button */}
+      <button
+        className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded bg-[#9b87f5] text-white hover:bg-[#7d67e5] focus:outline-none focus:ring-2 focus:ring-[#9b87f5]"
+        onClick={() => navigate("/app")}
+        type="button"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Back to Dashboard
+      </button>
       <div className="flex items-center mb-8 gap-3">
         <Youtube className="w-8 h-8 text-red-500" />
         <h1 className="text-3xl font-bold">Txt 2 YT</h1>
