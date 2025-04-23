@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Send } from "lucide-react";
@@ -87,17 +86,25 @@ const FellowAIChatModal = ({
   function showToast(msg: string) {
     toast({
       description: msg,
-      variant: "warning"
+      variant: "default" // Use allowed variant
     });
   }
 
-  // Allow sending even if already sending. Spam protection: warn if sending too quickly.
+  // Allow sending at any time, no matter the state
   const handleSend = async (customMessage?: string) => {
-    setAiError(null); // Reset error state
+    setAiError(null);
     const msgToSend = typeof customMessage === "string" ? customMessage : input.trim();
+    // If input is empty, still allow send but warn user
     if (!msgToSend) {
-      return;
+      showToast("Please enter a message before sending.");
+      // (Optional: continue with sending blank, or just return; user requested to allow send.)
+      // Remove the next line to allow sending empty, or keep for gentle warning:
+      // return;
     }
+
+    // Debug log for trace
+    console.log("Sending message:", msgToSend || "(empty)");
+
     // Very basic rate limit: warn if sent <0.75s apart
     const now = Date.now();
     if (now - lastSentRef.current < 750) {
@@ -117,10 +124,11 @@ const FellowAIChatModal = ({
     setSending(true);
     addPendingAiMessage();
 
-    // AI reply with Gemini
     let aiText = "";
     try {
       aiText = await getGeminiReply({ message: userMsg.content });
+      // Debug log AI response
+      console.log("Gemini replied:", aiText);
       if (
         !aiText ||
         aiText.toLowerCase().startsWith("error") ||
@@ -148,7 +156,8 @@ const FellowAIChatModal = ({
   }, [open, fellow]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" /* allow sending always, even if busy, only block if input empty */ && input.trim()) {
+    if (e.key === "Enter") {
+      // Allow sending always, even if input is empty
       handleSend();
     }
   };
@@ -229,12 +238,12 @@ const FellowAIChatModal = ({
             className="flex-1 rounded-full px-4 py-2 border focus:outline-none text-sm"
             placeholder="Type a message"
             onKeyDown={handleInputKeyDown}
-            disabled={false} // Always enabled
+            disabled={false} // Always allow typing
             aria-label="Type a message"
           />
           <button
             onClick={() => handleSend()}
-            disabled={!input.trim()} // Only disable if input is empty
+            disabled={false} // Always enabled, as requested
             className="p-2 bg-[#25d366] rounded-full text-white hover:bg-[#22ba5b] transition-colors"
             aria-label="Send"
           >
@@ -247,4 +256,3 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
-
