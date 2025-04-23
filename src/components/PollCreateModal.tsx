@@ -33,7 +33,7 @@ const MIN_OPTIONS = 2;
 const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, onCreate }) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
-  const [duration, setDuration] = useState(DURATION_OPTIONS[0].value);
+  const [duration, setDuration] = useState<number | "custom">(DURATION_OPTIONS[0].value);
   const [customDuration, setCustomDuration] = useState(1);
   const [visibility, setVisibility] = useState("public");
   const [type, setType] = useState("single");
@@ -47,16 +47,25 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
     if (options.length > MIN_OPTIONS) setOptions(opts => opts.filter((_, i) => i !== idx));
   };
 
+  const getDurationSeconds = () => {
+    if (duration === "custom") {
+      return customDuration * 60 * 60;
+    }
+    return duration;
+  };
+
   const handleSubmit = () => {
     if (!question.trim() || options.some(opt => !opt.trim())) return;
     setLoading(true);
     setTimeout(() => {
+      const durationSeconds = getDurationSeconds();
+
       onCreate({
         id: `poll-${Date.now()}`,
         question,
         options: options.filter(Boolean),
-        duration: duration === "custom" ? customDuration * 60 * 60 : duration,
-        endsAt: Date.now() + ((duration === "custom" ? customDuration * 60 * 60 : duration) * 1000),
+        duration: durationSeconds,
+        endsAt: Date.now() + durationSeconds * 1000,
         visibility,
         type,
         votes: options.map(() => 0),
@@ -113,7 +122,7 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
               <CirclePlus className="h-4 w-4" /> Add Option
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             {DURATION_OPTIONS.map(opt => (
               <button
                 key={opt.value}
@@ -126,15 +135,17 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
               </button>
             ))}
             {duration === "custom" && (
-              <Input
-                type="number"
-                min={1}
-                value={customDuration}
-                onChange={e => setCustomDuration(Number(e.target.value))}
-                className="max-w-[90px] ml-2"
-                suffix="hour(s)"
-                disabled={loading}
-              />
+              <div className="flex items-center ml-2 gap-1">
+                <Input
+                  type="number"
+                  min={1}
+                  value={customDuration}
+                  onChange={e => setCustomDuration(Number(e.target.value))}
+                  className="max-w-[90px]"
+                  disabled={loading}
+                />
+                <span className="text-sm text-muted-foreground">hour(s)</span>
+              </div>
             )}
           </div>
           <div className="flex gap-2">
@@ -177,3 +188,4 @@ const PollCreateModal: React.FC<PollCreateModalProps> = ({ open, onOpenChange, o
 };
 
 export default PollCreateModal;
+
