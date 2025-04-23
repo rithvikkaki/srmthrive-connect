@@ -19,21 +19,39 @@ const Feed = () => {
       author: { id: "1", name: "Shekhar", avatar: "https://i.pravatar.cc/100?img=11" },
       timeAgo: "6 months ago",
       content: "I am Shekhar from 3rd year",
-      likes: 1, comments: 0
+      likes: 1,
+      comments: 0,
+      images: undefined,
+      image: undefined,
+      isLiked: false,
+      tags: [],
+      privacy: "public"
     },
     {
       id: "2",
       author: { id: "2", name: "Ram", avatar: "https://i.pravatar.cc/100?img=33" },
       timeAgo: "7 months ago",
       content: "Hi! I am Ram from SRM University.",
-      likes: 2, comments: 1, isLiked: true
+      likes: 2,
+      comments: 1,
+      isLiked: true,
+      images: undefined,
+      image: undefined,
+      tags: [],
+      privacy: "public"
     },
     {
       id: "3",
       author: { id: "3", name: "MUKUL", avatar: "https://i.pravatar.cc/100?img=45" },
       timeAgo: "7 months ago",
       content: "Hello everyone!",
-      likes: 0, comments: 0
+      likes: 0,
+      comments: 0,
+      images: undefined,
+      image: undefined,
+      isLiked: false,
+      tags: [],
+      privacy: "public"
     },
     {
       id: "4",
@@ -41,7 +59,12 @@ const Feed = () => {
       timeAgo: "a minute ago",
       content: "What is blog? A blog (a shortened version of 'weblog') is an online journal or informational website displaying information in reverse chronological order, with the latest posts appearing first, at the top. It is a platform where a writer or a group of writers share their views on an individual subject.",
       image: "/lovable-uploads/0fed3929-0d14-470a-ad7b-e302d12eaecd.png",
-      likes: 1, comments: 0
+      images: undefined,
+      likes: 1,
+      comments: 0,
+      isLiked: false,
+      tags: [],
+      privacy: "public"
     }
   ]);
   const [showPostModal, setShowPostModal] = useState(false);
