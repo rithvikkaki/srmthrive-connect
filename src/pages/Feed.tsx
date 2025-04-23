@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,11 @@ import PollCard from "@/components/PollCard";
 import UserCard from "@/components/UserCard";
 import BlogForm from "@/components/BlogForm";
 import PostCreateModal from "@/components/PostCreateModal";
+import CreatePostButton from "@/components/CreatePostButton";
+import CreatePollButton from "@/components/CreatePollButton";
+import PollCreateModal from "@/components/PollCreateModal";
 
 const Feed = () => {
-  // FEED POSTS -- concise and type-consistent
   const [posts, setPosts] = useState([
     {
       id: "1",
@@ -68,8 +69,9 @@ const Feed = () => {
   const [showPostModal, setShowPostModal] = useState(false);
   const [showBlogForm, setShowBlogForm] = useState(false);
   const { toast } = useToast();
+  const [polls, setPolls] = useState<any[]>([]);
+  const [showPollModal, setShowPollModal] = useState(false);
 
-  // FAKE PROFILE FOR DEMO (simulate avatar update: pulls last user's post avatar)
   const username = posts.find(p => p.author.id === "4")?.author.name || "Rithvik Kaki";
   const avatarUrl = posts.find(p => p.author.id === "4")?.author.avatar || "https://i.pravatar.cc/100?img=12";
 
@@ -97,24 +99,26 @@ const Feed = () => {
     });
   };
 
+  // Poll create handler
+  const handleCreatePoll = (poll: any) => {
+    setPolls([poll, ...polls]);
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Floating "+" button */}
-      <button
-        onClick={() => setShowPostModal(true)}
-        className="fixed z-30 bottom-8 right-8 md:bottom-10 md:right-12 flex items-center justify-center bg-[#9b87f5] text-white rounded-full w-14 h-14 shadow-lg hover:bg-[#7E69AB] transition-colors"
-        aria-label="Create Post"
-        title="Create Post"
-        style={{ boxShadow: "0 4px 16px #9b87f544" }}
-      >
-        <Plus className="w-8 h-8" />
-      </button>
+      <CreatePostButton onClick={() => setShowPostModal(true)} />
+      <CreatePollButton onClick={() => setShowPollModal(true)} />
       <PostCreateModal
         open={showPostModal}
         onOpenChange={setShowPostModal}
         onCreate={handleCreatePost}
         username={username}
         avatarUrl={avatarUrl}
+      />
+      <PollCreateModal
+        open={showPollModal}
+        onOpenChange={setShowPollModal}
+        onCreate={handleCreatePoll}
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
@@ -134,6 +138,27 @@ const Feed = () => {
                 tags={post.tags}
                 privacy={post.privacy}
               />
+            ))}
+            {polls.map((poll) => (
+              <div className="animate-fade-in" key={poll.id}>
+                <PollCard
+                  id={poll.id}
+                  title={poll.question}
+                  description={""}
+                  options={poll.options.map((text: string, idx: number) => ({
+                    id: String(idx),
+                    text,
+                    votes: poll.votes[idx],
+                    percentage:
+                      poll.votes.reduce((a: number, b: number) => a + b, 0) === 0
+                        ? 0
+                        : Math.round(
+                            (poll.votes[idx] * 100) /
+                              poll.votes.reduce((a: number, b: number) => a + b, 0)
+                          ),
+                  }))}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -176,6 +201,4 @@ const Feed = () => {
     </div>
   );
 };
-
 export default Feed;
-
