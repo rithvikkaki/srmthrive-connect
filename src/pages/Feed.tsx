@@ -1,149 +1,68 @@
+
 import React, { useState, useRef } from "react";
-import { EditIcon, Pencil, FileImage, BarChart2, MoreHorizontal } from "lucide-react";
+import { EditIcon, FileImage, BarChart2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import Post from "@/components/Post";
 import PollCard from "@/components/PollCard";
 import UserCard from "@/components/UserCard";
 import BlogForm from "@/components/BlogForm";
+import PostCreateModal from "@/components/PostCreateModal";
 
 const MAX_LENGTH = 500;
 
 const Feed = () => {
-  const [postText, setPostText] = useState("");
-  const [postImage, setPostImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const [showBlogForm, setShowBlogForm] = useState(false);
+  // FEED POSTS -- updated post photo flow
   const [posts, setPosts] = useState([
     {
       id: "1",
-      author: {
-        id: "1",
-        name: "Shekhar",
-        avatar: "https://i.pravatar.cc/100?img=11"
-      },
+      author: { id: "1", name: "Shekhar", avatar: "https://i.pravatar.cc/100?img=11" },
       timeAgo: "6 months ago",
       content: "I am Shekhar from 3rd year",
-      likes: 1,
-      comments: 0
+      likes: 1, comments: 0
     },
     {
       id: "2",
-      author: {
-        id: "2",
-        name: "Ram",
-        avatar: "https://i.pravatar.cc/100?img=33"
-      },
+      author: { id: "2", name: "Ram", avatar: "https://i.pravatar.cc/100?img=33" },
       timeAgo: "7 months ago",
       content: "Hi! I am Ram from SRM University.",
-      likes: 2,
-      comments: 1,
-      isLiked: true
+      likes: 2, comments: 1, isLiked: true
     },
     {
       id: "3",
-      author: {
-        id: "3",
-        name: "MUKUL",
-        avatar: "https://i.pravatar.cc/100?img=45"
-      },
+      author: { id: "3", name: "MUKUL", avatar: "https://i.pravatar.cc/100?img=45" },
       timeAgo: "7 months ago",
       content: "Hello everyone!",
-      likes: 0,
-      comments: 0
+      likes: 0, comments: 0
     },
     {
       id: "4",
-      author: {
-        id: "4",
-        name: "Rithvik Kaki",
-        avatar: "https://i.pravatar.cc/100?img=12"
-      },
+      author: { id: "4", name: "Rithvik Kaki", avatar: "https://i.pravatar.cc/100?img=12" },
       timeAgo: "a minute ago",
       content: "What is blog? A blog (a shortened version of 'weblog') is an online journal or informational website displaying information in reverse chronological order, with the latest posts appearing first, at the top. It is a platform where a writer or a group of writers share their views on an individual subject.",
       image: "/lovable-uploads/0fed3929-0d14-470a-ad7b-e302d12eaecd.png",
-      likes: 1,
-      comments: 0
+      likes: 1, comments: 0
     }
   ]);
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [showBlogForm, setShowBlogForm] = useState(false);
   const { toast } = useToast();
 
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  // FAKE PROFILE FOR DEMO (simulate avatar update: pulls last user's post avatar)
+  const username = posts.find(p => p.author.id === "4")?.author.name || "Rithvik Kaki";
+  const avatarUrl = posts.find(p => p.author.id === "4")?.author.avatar || "https://i.pravatar.cc/100?img=12";
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid file", description: "Not an image!" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File too big", description: "Max 5MB image only." });
-      return;
-    }
-    setPostImage(file);
-    setPreviewUrl(URL.createObjectURL(file));
-  };
-
-  const removeImage = () => {
-    setPostImage(null);
-    setPreviewUrl(null);
-    if (imageInputRef.current) imageInputRef.current.value = "";
-  };
-
-  // --- Posting System Revamp ---
-  const handleSubmitPost = () => {
-    if (!postText.trim() && !postImage) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Post content or image is required",
-      });
-      return;
-    }
-    if (postText.length > MAX_LENGTH) {
-      toast({
-        variant: "destructive",
-        title: "Too long!",
-        description: `Must be ≤ ${MAX_LENGTH} characters.`,
-      });
-      return;
-    }
-    const newPost = {
-      id: `post-${Date.now()}`,
-      author: {
-        id: "4",
-        name: "Rithvik Kaki",
-        avatar: "https://i.pravatar.cc/100?img=12"
-      },
-      timeAgo: "just now",
-      content: postText,
-      likes: 0,
-      comments: 0,
-      image: postImage ? previewUrl : undefined
-    };
-
-    setPosts([newPost, ...posts]);
-    setPostText("");
-    setPostImage(null);
-    setPreviewUrl(null);
-
-    toast({
-      title: "Post created",
-      description: "Your post has been successfully published",
-    });
+  const handleCreatePost = (post: any) => {
+    setPosts([post, ...posts]);
   };
 
   const handleBlogSubmit = (title: string, content: string, image: File | null) => {
-    // Create a new blog post
     const newPost = {
       id: `blog-${Date.now()}`,
       author: {
         id: "4",
         name: "Rithvik Kaki",
-        avatar: "https://i.pravatar.cc/100?img=12"
+        avatar: avatarUrl
       },
       timeAgo: "just now",
       content: `${title}\n\n${content}`,
@@ -162,134 +81,51 @@ const Feed = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Floating "+" button */}
+      <button
+        onClick={() => setShowPostModal(true)}
+        className="fixed z-30 bottom-8 right-8 md:bottom-10 md:right-12 flex items-center justify-center bg-[#9b87f5] text-white rounded-full w-14 h-14 shadow-lg hover:bg-[#7E69AB] transition-colors"
+        aria-label="Create Post"
+        title="Create Post"
+        style={{ boxShadow: "0 4px 16px #9b87f544" }}
+      >
+        <Plus className="w-8 h-8" />
+      </button>
+      <PostCreateModal
+        open={showPostModal}
+        onOpenChange={setShowPostModal}
+        onCreate={handleCreatePost}
+        username={username}
+        avatarUrl={avatarUrl}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-card rounded-md shadow-sm border border-border p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
-                <img 
-                  src="https://i.pravatar.cc/100?img=12" 
-                  alt="Rithvik Kaki"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <Input
-                placeholder="WHAT'S ON YOUR MIND? RITHVIK KAKI"
-                value={postText}
-                maxLength={MAX_LENGTH}
-                onChange={e => setPostText(e.target.value)}
-                className="flex-1"
-              />
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-xs ${postText.length > MAX_LENGTH ? "text-red-500" : "text-muted-foreground"}`}>
-                {postText.length}/{MAX_LENGTH}
-              </span>
-            </div>
-            {/* Image preview */}
-            {previewUrl && (
-              <div className="relative mb-3">
-                <img src={previewUrl} alt="Preview" className="max-h-48 rounded w-full object-cover border" />
-                <button
-                  className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1"
-                  onClick={removeImage}
-                  type="button"
-                  aria-label="Remove image"
-                >
-                  <span className="sr-only">Remove image</span>
-                  <FileImage size={18} />
-                  <span className="ml-1 text-xs">Remove</span>
-                </button>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={handleSubmitPost}
-              >
-                <EditIcon className="h-4 w-4" />
-                <span>CREATE POST</span>
-              </Button>
-              <Button
-                onClick={() => {
-                  imageInputRef.current?.click();
-                }}
-                variant="outline"
-                className="flex items-center gap-2 flex-1"
-                type="button"
-              >
-                <FileImage className="h-4 w-4" />
-                <span>Add Image</span>
-              </Button>
-              <input
-                type="file"
-                ref={imageInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-                tabIndex={-1}
-              />
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => setShowBlogForm(true)}
-              >
-                <Pencil className="h-4 w-4" />
-                <span>WRITE BLOG</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "Post Ad feature is under development",
-                  });
-                }}
-              >
-                <FileImage className="h-4 w-4" />
-                <span>POST AD</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 flex-1"
-                onClick={() => {
-                  toast({
-                    title: "Coming Soon",
-                    description: "Poll feature is under development",
-                  });
-                }}
-              >
-                <BarChart2 className="h-4 w-4" />
-                <span>POLL</span>
-              </Button>
-            </div>
-          </div>
-          
+          {/* Old post bar is removed! Use FAB above */}
           <div className="space-y-6">
             {posts.map(post => (
-              <Post 
+              <Post
                 key={post.id}
                 id={post.id}
                 author={post.author}
                 timeAgo={post.timeAgo}
                 content={post.content}
                 image={post.image}
+                images={post.images}
                 likes={post.likes}
                 comments={post.comments}
                 isLiked={post.isLiked}
+                tags={post.tags}
+                privacy={post.privacy}
               />
             ))}
           </div>
         </div>
-        
+
         <div className="space-y-6">
           <div>
             <h3 className="font-medium mb-3">Polls</h3>
-            <PollCard 
+            <PollCard
               id="1"
               title="SKIP"
               description="Friday party. Are you guys ready?"
@@ -299,39 +135,39 @@ const Feed = () => {
               ]}
             />
           </div>
-          
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium">Contacts</h3>
             </div>
             <div className="bg-card rounded-md shadow-sm border border-border p-4">
               <h4 className="font-medium mb-3">Fellows</h4>
+              {/* Fellows list—remove "Apply now" button/logic */}
               <div className="space-y-3">
-                <UserCard 
+                <UserCard
                   id="1"
                   name="Naina Upadhyay"
                   role="Student"
                   avatar="https://i.pravatar.cc/100?img=5"
                 />
-                <UserCard 
+                <UserCard
                   id="2"
                   name="Wonder Woman"
                   role="Student"
                   avatar="https://i.pravatar.cc/100?img=32"
                 />
-                <UserCard 
+                <UserCard
                   id="3"
                   name="Bill Gates"
                   role="Student"
                   avatar="https://i.pravatar.cc/100?img=60"
                 />
-                <UserCard 
+                <UserCard
                   id="4"
                   name="Devesh Kumar Singh"
                   role="Student"
                   avatar="https://i.pravatar.cc/100?img=15"
                 />
-                <UserCard 
+                <UserCard
                   id="5"
                   name="Chetan Bhardwaj"
                   role="Student"
@@ -342,9 +178,8 @@ const Feed = () => {
           </div>
         </div>
       </div>
-      
       {showBlogForm && (
-        <BlogForm 
+        <BlogForm
           onClose={() => setShowBlogForm(false)}
           onSubmit={handleBlogSubmit}
         />

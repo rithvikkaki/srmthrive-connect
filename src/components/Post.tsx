@@ -1,13 +1,13 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send, Tag, Lock, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 
+// EXTENDED post props
 interface PostProps {
   id: string;
   author: {
@@ -18,10 +18,13 @@ interface PostProps {
   timeAgo: string;
   content: string;
   image?: string;
+  images?: string[];
   likes: number;
   comments: number;
   isLiked?: boolean;
   isBookmarked?: boolean;
+  tags?: string[];
+  privacy?: string;
 }
 
 interface Comment {
@@ -35,16 +38,25 @@ interface Comment {
   timeAgo: string;
 }
 
+const PRIVACY_ICONS: Record<string, any> = {
+  public: Eye,
+  followers: Lock,
+  private: EyeOff,
+};
+
 const Post = ({
   id,
   author,
   timeAgo,
   content,
   image,
+  images,
   likes,
   comments,
   isLiked = false,
   isBookmarked = false,
+  tags = [],
+  privacy = "public",
 }: PostProps) => {
   const [liked, setLiked] = useState(isLiked);
   const [likeCount, setLikeCount] = useState(likes);
@@ -86,7 +98,6 @@ const Post = ({
       });
       return;
     }
-
     const newComment: Comment = {
       id: `comment-${Date.now()}`,
       author: {
@@ -97,10 +108,11 @@ const Post = ({
       content: commentText,
       timeAgo: "just now",
     };
-
     setCommentsList([newComment, ...commentsList]);
     setCommentText("");
   };
+
+  const PrivacyIcon = PRIVACY_ICONS[privacy] || Eye;
 
   return (
     <div className="bg-card rounded-md shadow-sm overflow-hidden border border-border animate-fade-in">
@@ -123,7 +135,23 @@ const Post = ({
               >
                 {author.name}
               </Link>
-              <p className="text-xs text-muted-foreground">{timeAgo}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{timeAgo}</span>
+                <PrivacyIcon className="h-3 w-3" />
+                {tags && tags.length > 0 && (
+                  <span className="flex gap-[2px] items-center">
+                    <Tag className="h-3 w-3 ml-1" />
+                    {tags.map((tag, i) => (
+                      <span
+                        key={tag + i}
+                        className="ml-1 text-thrive-500 font-semibold"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -135,7 +163,19 @@ const Post = ({
           <p className="text-sm">{content}</p>
         </div>
 
-        {image && (
+        {/* Image / Images grid */}
+        {images && images.length > 1 ? (
+          <div className="mb-3 -mx-4 grid grid-cols-2 gap-2">
+            {images.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt={`Post image ${idx + 1}`}
+                className="w-full object-cover max-h-64 rounded"
+              />
+            ))}
+          </div>
+        ) : image ? (
           <div className="mb-3 -mx-4">
             <img
               src={image}
@@ -143,7 +183,7 @@ const Post = ({
               className="w-full object-cover max-h-96"
             />
           </div>
-        )}
+        ) : null}
 
         <div className="flex border-t border-border pt-3">
           <Button
