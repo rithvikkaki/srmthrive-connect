@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon, Youtube } from "lucide-react";
+import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -46,10 +46,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
             <Link to="/app/notices" className="nav-link">
               <GraduationCap className="w-6 h-6" />
             </Link>
-            <Link to="/txt2yt" className="nav-link flex items-center gap-1">
-              <Youtube className="w-5 h-5 text-red-500" />
-              <span className="font-medium text-sm">Txt 2 YT</span>
-            </Link>
+            {/* Txt2YT link REMOVED here */}
           </div>
 
           <div className="flex items-center gap-4">
