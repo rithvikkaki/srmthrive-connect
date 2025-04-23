@@ -30,14 +30,16 @@ const assignments = [
     title: "Math Assignment 3",
     description: "Complete the integrals exercise from the textbook.",
     dueDate: "2024-05-02",
-    portal: "classroom",
+    portal: "classroom" as const,
+    subject: "Mathematics",
   },
   {
     id: 2,
     title: "Physics Lab Report",
     description: "Submit your lab report on lens experiments.",
     dueDate: "2024-05-05",
-    portal: "academia",
+    portal: "academia" as const,
+    subject: "Physics",
   },
 ];
 
