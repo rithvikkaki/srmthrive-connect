@@ -1,8 +1,10 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Send } from "lucide-react";
 import { useGeminiReply } from "@/hooks/useGeminiReply";
 import { Avatar } from "@/components/ui/avatar";
+import { toast } from "@/hooks/use-toast"; // <-- fix: correctly import toast
 
 interface FellowAIChatModalProps {
   open: boolean;
@@ -83,13 +85,10 @@ const FellowAIChatModal = ({
 
   // Helper function for warning toasts (uses shadcn/ui toast)
   function showToast(msg: string) {
-    // @ts-ignore
-    if (window && window.toast) {
-      // If you have a global toast from shadcn/ui
-      window.toast(msg, { variant: "warning" });
-    } else {
-      alert(msg); // fallback (can swap if you use shadcn/ui's actual toast)
-    }
+    toast({
+      description: msg,
+      variant: "warning"
+    });
   }
 
   // Allow sending even if already sending. Spam protection: warn if sending too quickly.
@@ -248,3 +247,4 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
+
