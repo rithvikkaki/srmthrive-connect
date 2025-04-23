@@ -83,16 +83,17 @@ const FellowAIChatModal = ({
     setMessages(msgs => msgs.filter(m => m.id !== "pending-ai"));
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || sending) return;
+  const handleSend = async (customMessage?: string) => {
+    const msgToSend = typeof customMessage === "string" ? customMessage : input.trim();
+    if (!msgToSend || sending) return;
     const userMsg: Message = {
       id: Math.random().toString(36).slice(2),
-      content: input.trim(),
+      content: msgToSend,
       sender: "me",
       createdAt: new Date(),
     };
     setMessages((msgs) => [...msgs, userMsg]);
-    setInput("");
+    if (!customMessage) setInput("");
     setSending(true);
 
     // Add AI's "typing" bubble
@@ -117,14 +118,10 @@ const FellowAIChatModal = ({
     if (!open) setMessages([]);
   }, [open, fellow]);
 
-  // Add this helper function that both sets the input and triggers sending the message
-  const handleExampleClick = async (q: string) => {
-    setInput(q);
-    // Wait for input state to update, then send
-    // Using a microtask to ensure state update
-    setTimeout(() => {
-      handleSend();
-    }, 0);
+  // Update to directly call handleSend with the example question as param
+  const handleExampleClick = (q: string) => {
+    handleSend(q);
+    setInput("");
   };
 
   return (
@@ -194,7 +191,7 @@ const FellowAIChatModal = ({
             disabled={sending || loading}
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={sending || loading || !input.trim()}
             className="p-2 bg-[#25d366] rounded-full text-white hover:bg-[#22ba5b] transition-colors"
             aria-label="Send"
