@@ -237,6 +237,16 @@ const Profile = () => {
     });
   };
 
+  // Add this function to handle upload cancel/reset
+  const cancelUpload = () => {
+    setDialogOpen(false);
+    setUploadedImage(null);
+    setPreviewUrl(null);
+    setUploadProgress(0);
+    setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-black/90 rounded-lg overflow-hidden">
