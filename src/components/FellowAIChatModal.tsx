@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Send } from "lucide-react";
@@ -102,7 +101,7 @@ const FellowAIChatModal = ({
     // AI reply with Gemini
     let aiText = "";
     try {
-      aiText = await getGeminiReply({ message: userMsg.content, apiKey: geminiApiKey });
+      aiText = await getGeminiReply({ message: userMsg.content });
     } catch (e) {
       aiText = "Sorry, Gemini could not reply due to an error.";
     }
@@ -199,4 +198,3 @@ const FellowAIChatModal = ({
 };
 
 export default FellowAIChatModal;
-
