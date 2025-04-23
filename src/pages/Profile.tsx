@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useOutletContext } from "react-router-dom";
 import { EditIcon, Pencil, FileImage, BarChart2, Package, Calendar, BookOpen, Settings, Upload, X, Check, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,14 +22,18 @@ const PREDEFINED_INTERESTS = [
   "AI", "Web Dev", "Blockchain", "FinTech", "IoT", "Music", "ML", "Writing", "Football", "Guitar"
 ];
 
-interface ProfileProps {
+// Use Outlet context to get these props
+interface OutletProfileContext {
   avatarUrl: string;
   onAvatarChange: (url: string) => void;
   name: string;
   role: string;
 }
 
-const Profile = ({ avatarUrl: globalAvatarUrl, onAvatarChange, name, role }: ProfileProps) => {
+// Remove ProfileProps type, will use context
+
+const Profile = () => {
+  const { avatarUrl: globalAvatarUrl, onAvatarChange, name, role } = useOutletContext<OutletProfileContext>();
   const { id } = useParams();
 
   // ----- NEW: Add additional profile fields and "About Me" -----
@@ -40,7 +44,6 @@ const Profile = ({ avatarUrl: globalAvatarUrl, onAvatarChange, name, role }: Pro
   };
 
   const [postText, setPostText] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState(globalAvatarUrl);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -165,12 +168,12 @@ const Profile = ({ avatarUrl: globalAvatarUrl, onAvatarChange, name, role }: Pro
     }
   };
 
-  // Save action: "instant" for now, but you can plug an actual upload here
+  // When profile photo is updated, sync up everywhere
   const handleUpdateAvatar = () => {
     if (previewUrl && uploadedImage) {
       setAvatarUrl(previewUrl);
       if (onAvatarChange) {
-        onAvatarChange(previewUrl);
+        onAvatarChange(previewUrl); // THIS propagates to Layout, which updates everywhere
       }
       toast({
         title: "Profile photo updated",
