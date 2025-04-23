@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Search, Bell, MessageCircle, Home, BookOpen, GraduationCap, Menu as MenuIcon, CheckCircle, AlertCircle, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   sidebarOpen: boolean;
@@ -20,31 +22,74 @@ interface NavbarProps {
   role: string;
 }
 
-const notifications = [
-  {
-    id: 1,
-    type: "success",
-    icon: <CheckCircle className="w-4 h-4 text-green-600 mr-2" />,
-    message: "Your event registration is confirmed!",
-    time: "1 min ago"
-  },
-  {
-    id: 2,
-    type: "warning",
-    icon: <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />,
-    message: "Assignment deadline tomorrow.",
-    time: "10 min ago"
-  },
-  {
-    id: 3,
-    type: "message",
-    icon: <MessageSquare className="w-4 h-4 text-thrive-500 mr-2" />,
-    message: "You received a new message from Aman.",
-    time: "20 min ago"
-  },
-];
+type NotificationType = "success" | "warning" | "message" | "info" | "other";
+
+const iconsMap: { [K in NotificationType]: JSX.Element } = {
+  success: <CheckCircle className="w-4 h-4 text-green-600 mr-2" />,
+  warning: <AlertCircle className="w-4 h-4 text-yellow-500 mr-2" />,
+  message: <MessageSquare className="w-4 h-4 text-thrive-500 mr-2" />,
+  info: <AlertCircle className="w-4 h-4 text-blue-500 mr-2" />,
+  other: <AlertCircle className="w-4 h-4 text-muted-foreground mr-2" />,
+};
 
 const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarProps) => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // fetch current user id from session
+    async function fetchNotifications() {
+      setLoading(true);
+      // Try to get the logged-in user's id from localStorage/session
+      // We assume JWT is managed by supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) {
+        setLoading(false);
+        setNotifications([]);
+        return;
+      }
+      // Fetch most recent notifications from backend
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) {
+        setNotifications([]);
+      } else if (data && data.length > 0) {
+        setNotifications(data);
+      } else {
+        setNotifications([]);
+      }
+      setLoading(false);
+    }
+    fetchNotifications();
+  }, []);
+
+  // fallback sample for demo when no notifications for user exist
+  const randomNotifications = [
+    {
+      id: "demo1",
+      type: "success",
+      message: "Your event registration is confirmed!",
+      created_at: Date.now(),
+    },
+    {
+      id: "demo2",
+      type: "warning",
+      message: "Assignment deadline tomorrow.",
+      created_at: Date.now(),
+    },
+    {
+      id: "demo3",
+      type: "message",
+      message: "You received a new message from Aman.",
+      created_at: Date.now(),
+    },
+  ];
+
   return (
     <header className="bg-background border-b border-border z-10">
       <div className="container mx-auto px-4 py-2">
@@ -94,17 +139,39 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, avatarUrl, name, role }: NavbarPr
                   <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-thrive-500"></span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="z-[99] w-80">
+              <DropdownMenuContent align="end" className="z-[99] w-80 bg-popover">
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {notifications.map((notif) => (
-                  <DropdownMenuItem key={notif.id} className="flex items-start space-x-2">
-                    <span className="pt-0.5">{notif.icon}</span>
-                    <span>
-                      <span className="block text-sm">{notif.message}</span>
-                      <span className="block text-xs text-muted-foreground">{notif.time}</span>
-                    </span>
+                {loading ? (
+                  <DropdownMenuItem disabled>
+                    Loading...
                   </DropdownMenuItem>
+                ) : (notifications.length > 0 ? (
+                  notifications.map((notif) => (
+                    <DropdownMenuItem key={notif.id} className="flex items-start space-x-2">
+                      <span className="pt-0.5">
+                        {iconsMap[notif.type as NotificationType] ?? iconsMap.other}
+                      </span>
+                      <span>
+                        <span className="block text-sm">{notif.message}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {new Date(notif.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  randomNotifications.map((notif) => (
+                    <DropdownMenuItem key={notif.id} className="flex items-start space-x-2 opacity-70">
+                      <span className="pt-0.5">
+                        {iconsMap[notif.type as NotificationType] ?? iconsMap.other}
+                      </span>
+                      <span>
+                        <span className="block text-sm">{notif.message}</span>
+                        <span className="block text-xs text-muted-foreground">Just now</span>
+                      </span>
+                    </DropdownMenuItem>
+                  ))
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
