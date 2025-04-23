@@ -1,8 +1,7 @@
 
 import { Link } from "react-router-dom";
-import { Users, Layers, Calendar, FileText, Bookmark, ExternalLink } from "lucide-react";
+import { Users, Layers, Calendar, FileText, Bookmark, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import UpdateCard from "./UpdateCard";
 import ContactsList from "./ContactsList";
@@ -75,15 +74,13 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                   <Bookmark className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium uppercase text-sm">Bookmarks</span>
                 </Link>
-                <a 
-                  href="https://academia.srmist.edu.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link 
+                  to="/txt2yt"
                   className="flex items-center gap-3 p-2 rounded-md hover:bg-muted transition-colors"
                 >
-                  <ExternalLink className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium uppercase text-sm">Academia</span>
-                </a>
+                  <Youtube className="h-5 w-5 text-red-500" />
+                  <span className="font-medium uppercase text-sm">Txt2YT</span>
+                </Link>
               </nav>
 
               <div className="mt-6">
