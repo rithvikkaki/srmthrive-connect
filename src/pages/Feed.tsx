@@ -21,8 +21,8 @@ const Feed = () => {
       content: "I am Shekhar from 3rd year",
       likes: 1,
       comments: 0,
-      images: undefined,
       image: undefined,
+      images: undefined,
       isLiked: false,
       tags: [],
       privacy: "public"
@@ -34,9 +34,9 @@ const Feed = () => {
       content: "Hi! I am Ram from SRM University.",
       likes: 2,
       comments: 1,
-      isLiked: true,
-      images: undefined,
       image: undefined,
+      images: undefined,
+      isLiked: true,
       tags: [],
       privacy: "public"
     },
@@ -47,8 +47,8 @@ const Feed = () => {
       content: "Hello everyone!",
       likes: 0,
       comments: 0,
-      images: undefined,
       image: undefined,
+      images: undefined,
       isLiked: false,
       tags: [],
       privacy: "public"
